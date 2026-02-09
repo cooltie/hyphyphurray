@@ -1,29 +1,30 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hypothesis Tester</title>
+    <title>Hypothesis Tester v2.0</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f7fa;
             color: #333;
             line-height: 1.6;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         header {
             background: linear-gradient(135deg, #4472C4, #2E5A9C);
             color: white;
@@ -32,24 +33,15 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(68, 114, 196, 0.3);
         }
-        
-        header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        
-        header p {
-            opacity: 0.9;
-        }
-        
+
         .card {
             background: white;
             border-radius: 12px;
             padding: 25px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
-        
+
         .card h2 {
             font-size: 18px;
             color: #4472C4;
@@ -57,7 +49,7 @@
             padding-bottom: 10px;
             border-bottom: 2px solid #e8ecf1;
         }
-        
+
         .setup-section {
             background: #fff9e6;
             border-left: 4px solid #f0ad4e;
@@ -65,21 +57,15 @@
             margin-bottom: 25px;
             border-radius: 0 12px 12px 0;
         }
-        
-        .setup-section h3 {
-            color: #8a6d3b;
-            margin-bottom: 10px;
-        }
-        
+
         .setup-section input {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
             margin-top: 10px;
         }
-        
+
         .setup-section button {
             margin-top: 15px;
             background: #f0ad4e;
@@ -90,922 +76,474 @@
             cursor: pointer;
             font-weight: 600;
         }
-        
-        .setup-section button:hover {
-            background: #ec971f;
-        }
-        
+
         .groups-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 25px;
             margin-bottom: 25px;
         }
-        
-        @media (max-width: 900px) {
-            .groups-container {
-                grid-template-columns: 1fr;
-            }
-        }
-        
+
         .group-card {
             padding: 20px;
             border-radius: 10px;
         }
-        
+
         .group-a {
             background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
             border: 2px solid #81c784;
         }
-        
+
         .group-b {
             background: linear-gradient(135deg, #fff3e0, #ffe0b2);
             border: 2px solid #ffb74d;
         }
-        
-        .group-card h3 {
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-        
-        .group-a h3 { color: #2e7d32; }
-        .group-b h3 { color: #e65100; }
-        
+
         .tag-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 12px;
         }
-        
-        .tag-row select, .tag-row input {
+
+        .tag-row select {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 14px;
             background: white;
+            width: 100%;
         }
-        
+
+        .hyp-id-row {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .hyp-id-row label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 5px;
+        }
+
+        .hyp-id-row select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #81c784;
+        }
+
         .settings-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
         }
-        
-        .setting-item label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #555;
-            font-size: 13px;
-        }
-        
-        .setting-item select,
-        .setting-item input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-        
-        .countries-select {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .country-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: #f0f4f8;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .country-checkbox:hover {
-            background: #e1e8f0;
-        }
-        
-        .country-checkbox input:checked + span {
-            font-weight: 600;
-            color: #4472C4;
-        }
-        
-        .filter-row {
-            display: grid;
-            grid-template-columns: 1fr auto 100px;
-            gap: 10px;
-            align-items: end;
-        }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, #4472C4, #2E5A9C);
             color: white;
             border: none;
             padding: 15px 40px;
             border-radius: 8px;
-            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            transition: 0.2s;
         }
-        
-        .btn-primary:hover {
+
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(68, 114, 196, 0.4);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        
+
         .btn-primary:disabled {
             background: #ccc;
             cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
         }
-        
-        .btn-copy {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-left: 10px;
-        }
-        
-        .btn-copy:hover {
-            background: #218838;
-        }
-        
-        .results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        .results-table th {
-            background: #4472C4;
-            color: white;
-            padding: 12px 15px;
-            text-align: left;
-            font-weight: 600;
-        }
-        
-        .results-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .results-table tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .result-success {
-            color: #28a745;
-            font-weight: 600;
-        }
-        
-        .result-fail {
-            color: #dc3545;
-            font-weight: 600;
-        }
-        
-        .details-section {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        
-        .details-section h4 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .creatives-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            margin-top: 10px;
-        }
-        
-        .creatives-table th {
-            background: #6c757d;
-            color: white;
-            padding: 10px;
-            text-align: left;
-        }
-        
-        .creatives-table td {
-            padding: 8px 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-        
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #4472C4;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-left: 10px;
-            vertical-align: middle;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
+
         .status-badge {
-            display: inline-block;
             padding: 5px 15px;
             border-radius: 20px;
             font-size: 13px;
-            font-weight: 600;
         }
-        
+
         .status-connected {
             background: #d4edda;
             color: #155724;
         }
-        
+
         .status-disconnected {
             background: #f8d7da;
             color: #721c24;
         }
-        
+
         .hidden {
             display: none;
         }
-        
-        .static-value-section {
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 8px;
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
         }
-        
-        .checkbox-label {
-            display: flex;
+
+        .results-table th {
+            background: #4472C4;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .results-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .result-success {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .result-fail {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .country-checkbox {
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
+            background: #eee;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin: 2px;
             cursor: pointer;
-        }
-        
-        .summary-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-card .number {
-            font-size: 32px;
-            font-weight: 700;
-        }
-        
-        .stat-card .label {
             font-size: 13px;
-            opacity: 0.9;
-        }
-        
-        #copyNotification {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #28a745;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 8px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s;
-        }
-        
-        #copyNotification.show {
-            transform: translateY(0);
-            opacity: 1;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
             <h1>🧪 Hypothesis Tester</h1>
-            <p>Тестирование маркетинговых гипотез на основе данных из Google Sheets</p>
+            <p>Анализ маркетинговых гипотез на основе данных All_Ads_Data</p>
         </header>
-        
-        <!-- Setup Section -->
-        <div class="setup-section" id="setupSection">
+
+        <div class="setup-section">
             <h3>⚙️ Настройка подключения</h3>
-            <p>Вставь URL своего Google Apps Script деплоя:</p>
-            <input type="text" id="scriptUrl" placeholder="https://script.google.com/macros/s/xxx/exec">
-            <br>
-            <button onclick="connectToSheets()">Подключиться</button>
-            <span id="connectionStatus" class="status-badge status-disconnected" style="margin-left: 15px;">Не подключено</span>
+            <input type="text" id="scriptUrl" placeholder="Вставьте URL Google Apps Script">
+            <button onclick="connectToSheets()">Подключиться к таблице</button>
+            <span id="connectionStatus" class="status-badge status-disconnected">Не подключено</span>
         </div>
-        
-        <!-- Main Form -->
+
         <div class="card" id="mainForm">
-            <h2>📝 Параметры гипотезы</h2>
-            
             <div class="groups-container">
-                <!-- Group A -->
                 <div class="group-card group-a">
-                    <h3>🅰️ Группа A (тестируем)</h3>
-                    
+                    <h3>🅰️ Группа A (Тестируемая)</h3>
+                    <div class="hyp-id-row" style="border-top:none; margin-top:0; padding-top:0; margin-bottom:15px;">
+                        <label>HYPOTHESIS ID (Фильтр)</label>
+                        <select id="hypothesisIdA">
+                            <option value="">-- Все гипотезы --</option>
+                        </select>
+                    </div>
                     <div class="tag-row">
-                        <select id="tagType1A">
+                        <select id="tagType1A" onchange="updateValueDropdown('1A')">
                             <option value="">-- Тип тега 1 --</option>
                         </select>
-                        <input type="text" id="tagValue1A" placeholder="Значение тега 1">
-                    </div>
-                    
-                    <div class="tag-row">
-                        <select id="tagType2A">
-                            <option value="">-- Тип тега 2 (опц.) --</option>
+                        <select id="tagValue1A">
+                            <option value="">-- Значение --</option>
                         </select>
-                        <input type="text" id="tagValue2A" placeholder="Значение тега 2">
                     </div>
-                    
                     <div class="tag-row">
-                        <select id="tagType3A">
-                            <option value="">-- Тип тега 3 (опц.) --</option>
+                        <select id="tagType2A" onchange="updateValueDropdown('2A')">
+                            <option value="">-- Тип тега 2 --</option>
                         </select>
-                        <input type="text" id="tagValue3A" placeholder="Значение тега 3">
+                        <select id="tagValue2A">
+                            <option value="">-- Значение --</option>
+                        </select>
+                    </div>
+                    <div class="tag-row">
+                        <select id="tagType3A" onchange="updateValueDropdown('3A')">
+                            <option value="">-- Тип тега 3 --</option>
+                        </select>
+                        <select id="tagValue3A">
+                            <option value="">-- Значение --</option>
+                        </select>
                     </div>
                 </div>
-                
-                <!-- Group B -->
+
                 <div class="group-card group-b">
-                    <h3>🅱️ Группа B (сравниваем с)</h3>
-                    
+                    <h3>🅱️ Группа B (Контрольная)</h3>
                     <div class="tag-row">
-                        <select id="tagType1B">
+                        <select id="tagType1B" onchange="updateValueDropdown('1B')">
                             <option value="">-- Тип тега 1 --</option>
                         </select>
-                        <input type="text" id="tagValue1B" placeholder="Значение тега 1">
-                    </div>
-                    
-                    <div class="tag-row">
-                        <select id="tagType2B">
-                            <option value="">-- Тип тега 2 (опц.) --</option>
+                        <select id="tagValue1B">
+                            <option value="">-- Значение --</option>
                         </select>
-                        <input type="text" id="tagValue2B" placeholder="Значение тега 2">
                     </div>
-                    
                     <div class="tag-row">
-                        <select id="tagType3B">
-                            <option value="">-- Тип тега 3 (опц.) --</option>
+                        <select id="tagType2B" onchange="updateValueDropdown('2B')">
+                            <option value="">-- Тип тега 2 --</option>
                         </select>
-                        <input type="text" id="tagValue3B" placeholder="Значение тега 3">
+                        <select id="tagValue2B">
+                            <option value="">-- Значение --</option>
+                        </select>
                     </div>
-                    
-                    <div class="static-value-section">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="useStaticValue" onchange="toggleStaticValue()">
-                            <span>Сравнить со статичным значением</span>
-                        </label>
-                        <input type="number" id="staticValue" placeholder="Введите значение" style="margin-top: 10px; display: none;">
+                    <div class="tag-row">
+                        <select id="tagType3B" onchange="updateValueDropdown('3B')">
+                            <option value="">-- Тип тега 3 --</option>
+                        </select>
+                        <select id="tagValue3B">
+                            <option value="">-- Значение --</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:10px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 8px;">
+                        <label style="cursor:pointer"><input type="checkbox" id="useStaticValue"
+                                onchange="toggleStaticValue()"> Сравнить со статикой</label>
+                        <input type="number" id="staticValue" class="hidden" placeholder="Введите CPA/CPM..."
+                            style="width:100%; padding:8px; margin-top:5px; border: 1px solid #ddd; border-radius: 4px;">
                     </div>
                 </div>
             </div>
-            
-            <!-- Settings -->
+
             <div class="card" style="background: #f8f9fa;">
-                <h2>⚙️ Настройки</h2>
-                
+                <h2>⚙️ Настройки анализа</h2>
                 <div class="settings-grid">
-                    <div class="setting-item">
-                        <label>Страны</label>
-                        <div class="countries-select">
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="EU" checked> <span>EU</span>
-                            </label>
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="DE"> <span>DE</span>
-                            </label>
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="FR"> <span>FR</span>
-                            </label>
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="IT"> <span>IT</span>
-                            </label>
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="NL"> <span>NL</span>
-                            </label>
+                    <div>
+                        <label>Страны (GEO)</label>
+                        <div id="countryList" style="margin-top:5px">
                         </div>
                     </div>
-                    
-                    <div class="setting-item">
-                        <label>Метрика сравнения</label>
-                        <select id="metric">
+                    <div>
+                        <label>Метрика</label>
+                        <select id="metric" style="width:100%; padding:10px; border-radius:6px">
                             <option value="CPA">CPA (Cost per Onboarded)</option>
-                            <option value="CPM">CPM (Cost per 1000 Impressions)</option>
-                            <option value="CTR">CTR (Click-through Rate)</option>
-                            <option value="Onboarded">Onboarded (количество)</option>
-                            <option value="Amount Spent">Amount Spent (€)</option>
+                            <option value="CPM">CPM (Cost per 1000 Imp)</option>
+                            <option value="CTR">CTR (%)</option>
+                            <option value="Onboarded">Onboarded (Abs)</option>
+                            <option value="Amount Spent">Spend (€)</option>
                         </select>
                     </div>
-                    
-                    <div class="setting-item">
-                        <label>Условие</label>
-                        <select id="condition">
-                            <option value="greater">A больше B</option>
-                            <option value="less">A меньше B</option>
-                            <option value="greaterPercent">A больше B на %</option>
-                            <option value="lessPercent">A меньше B на %</option>
+                    <div>
+                        <label>Условие успеха</label>
+                        <select id="condition" style="width:100%; padding:10px; border-radius:6px">
+                            <option value="less">Группа A меньше B (лучше)</option>
+                            <option value="greater">Группа A больше B</option>
                         </select>
-                    </div>
-                    
-                    <div class="setting-item">
-                        <label>Значение % (если нужно)</label>
-                        <input type="number" id="conditionValue" placeholder="10" value="10">
                     </div>
                 </div>
-                
-                <div class="settings-grid" style="margin-top: 20px;">
-                    <div class="setting-item">
-                        <label>Фильтр: метрика</label>
-                        <select id="filterMetric">
-                            <option value="">-- Без фильтра --</option>
-                            <option value="Onboarded">Onboarded</option>
-                            <option value="Impressions">Impressions</option>
-                            <option value="Amount Spent">Amount Spent</option>
-                        </select>
-                    </div>
-                    
-                    <div class="setting-item">
-                        <label>Фильтр: оператор</label>
-                        <select id="filterOperator">
-                            <option value=">">&gt;</option>
-                            <option value="<">&lt;</option>
-                            <option value="=">=</option>
-                            <option value=">=">&gt;=</option>
-                            <option value="<=">&lt;=</option>
-                        </select>
-                    </div>
-                    
-                    <div class="setting-item">
-                        <label>Фильтр: значение</label>
-                        <input type="number" id="filterValue" placeholder="2">
-                    </div>
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="btn-primary" id="runTest" onclick="runHypothesisTest()" disabled>
-                    🚀 Проверить гипотезу
-                </button>
+                <button class="btn-primary" id="runTest" onclick="runHypothesisTest()" disabled
+                    style="margin-top:20px; font-size: 18px;">🚀 ПРОВЕРИТЬ ГИПОТЕЗУ</button>
             </div>
         </div>
-        
-        <!-- Results -->
+
         <div class="card hidden" id="resultsSection">
-            <h2>📊 Результаты 
-                <button class="btn-copy" onclick="copyResultsToClipboard()">📋 Копировать для Sheets</button>
-            </h2>
-            
-            <div class="summary-stats" id="summaryStats"></div>
-            
-            <table class="results-table" id="resultsTable">
+            <h2>📊 Результаты теста</h2>
+            <table class="results-table">
                 <thead>
                     <tr>
-                        <th>Страна</th>
+                        <th>GEO</th>
                         <th>Значение A</th>
                         <th>Значение B</th>
-                        <th>Разница</th>
-                        <th>Результат</th>
-                        <th>Действие</th>
+                        <th>Разница %</th>
+                        <th>Статус</th>
                     </tr>
                 </thead>
-                <tbody id="resultsBody">
-                </tbody>
+                <tbody id="resultsBody"></tbody>
             </table>
-            
-            <div class="details-section hidden" id="detailsSection">
-                <h4 id="detailsTitle">Детали</h4>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h5 style="color: #2e7d32; margin-bottom: 10px;">Группа A креативы:</h5>
-                        <table class="creatives-table" id="creativesTableA">
-                            <thead>
-                                <tr>
-                                    <th>Ad Name</th>
-                                    <th>Spent</th>
-                                    <th>Onboarded</th>
-                                    <th>CPA</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    
-                    <div>
-                        <h5 style="color: #e65100; margin-bottom: 10px;">Группа B креативы:</h5>
-                        <table class="creatives-table" id="creativesTableB">
-                            <thead>
-                                <tr>
-                                    <th>Ad Name</th>
-                                    <th>Spent</th>
-                                    <th>Onboarded</th>
-                                    <th>CPA</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
-    
-    <div id="copyNotification">✅ Скопировано в буфер обмена!</div>
-    
+
     <script>
-        // Global data
         let sheetsData = [];
-        let lastResults = [];
-        
-        // Tag types mapping to column names
-        const tagTypeToColumn = {
-            'GEO': 'GEO',
-            'Language': 'Language',
-            'Lane': 'Lane',
-            'Stage': 'Stage',
-            'Style': 'Style',
-            'Platform/Placement': 'Platform/Placement',
-            'Format': 'Format',
-            'Length': 'Length',
-            'CTA Tag': 'CTA Tag',
-            'Hook Tag': 'Hook Tag',
-            'Format Tag': 'Format Tag',
-            'Style Tag': 'Style Tag',
-            'Audience Tag': 'Audience Tag',
-            'Offer Tag': 'Offer Tag',
-            'Visual Tag 1': 'Visual Tag 1',
-            'Visual Tag 2': 'Visual Tag 2',
-            'Visual Tag 3': 'Visual Tag 3'
-        };
-        
-        // Initialize tag type dropdowns
-        function initTagDropdowns() {
-            const selects = ['tagType1A', 'tagType2A', 'tagType3A', 'tagType1B', 'tagType2B', 'tagType3B'];
-            const options = Object.keys(tagTypeToColumn);
-            
-            selects.forEach(selectId => {
-                const select = document.getElementById(selectId);
-                select.innerHTML = '<option value="">-- Выберите тип --</option>';
-                options.forEach(opt => {
-                    select.innerHTML += `<option value="${opt}">${opt}</option>`;
-                });
-            });
-        }
-        
-        // Connect to Google Sheets
+        let tagConfig = {};
+        let hypothesisIds = [];
+
         async function connectToSheets() {
             const url = document.getElementById('scriptUrl').value.trim();
-            if (!url) {
-                alert('Введите URL Apps Script');
-                return;
-            }
-            
+            if (!url) return alert("Вставьте URL!");
+
             const status = document.getElementById('connectionStatus');
-            status.textContent = 'Подключение...';
-            status.className = 'status-badge';
-            
+            status.textContent = 'Синхронизация...';
+
             try {
                 const response = await fetch(url);
                 const data = await response.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                sheetsData = data;
-                status.textContent = `Подключено (${data.length} строк)`;
+
+                sheetsData = data.adsData;
+                tagConfig = data.tagConfig;
+                hypothesisIds = data.hypothesisIds;
+
+                status.textContent = `Подключено: ${sheetsData.length} строк`;
                 status.className = 'status-badge status-connected';
                 document.getElementById('runTest').disabled = false;
-                
-                // Save URL to localStorage
+
+                fillInitialDropdowns();
+                fillCountryCheckboxes();
                 localStorage.setItem('sheetsScriptUrl', url);
-                
-            } catch (error) {
+            } catch (e) {
+                console.error(e);
                 status.textContent = 'Ошибка подключения';
                 status.className = 'status-badge status-disconnected';
-                alert('Ошибка: ' + error.message);
             }
         }
-        
-        // Toggle static value input
+
+        function fillInitialDropdowns() {
+            // Типы тегов
+            const typeSelects = ['tagType1A', 'tagType2A', 'tagType3A', 'tagType1B', 'tagType2B', 'tagType3B'];
+            const tags = Object.keys(tagConfig);
+
+            typeSelects.forEach(id => {
+                const s = document.getElementById(id);
+                s.innerHTML = '<option value="">-- Тип тега --</option>';
+                tags.forEach(t => s.innerHTML += `<option value="${t}">${t}</option>`);
+            });
+
+            // ID Гипотез для Группы А
+            const hypSelect = document.getElementById('hypothesisIdA');
+            hypSelect.innerHTML = '<option value="">-- Все гипотезы (без фильтра ID) --</option>';
+            hypothesisIds.forEach(id => {
+                hypSelect.innerHTML += `<option value="${id}">${id}</option>`;
+            });
+        }
+
+        function fillCountryCheckboxes() {
+            const countries = tagConfig['GEO'] || ['EU', 'DE', 'FR', 'IT', 'NL'];
+            const container = document.getElementById('countryList');
+            container.innerHTML = '';
+            countries.forEach(c => {
+                container.innerHTML += `
+                    <label class="country-checkbox">
+                        <input type="checkbox" value="${c}" checked> ${c}
+                    </label>
+                `;
+            });
+        }
+
+        function updateValueDropdown(suffix) {
+            const type = document.getElementById('tagType' + suffix).value;
+            const valSelect = document.getElementById('tagValue' + suffix);
+            valSelect.innerHTML = '<option value="">-- Значение --</option>';
+
+            if (type && tagConfig[type]) {
+                tagConfig[type].forEach(v => {
+                    valSelect.innerHTML += `<option value="${v}">${v}</option>`;
+                });
+            }
+        }
+
         function toggleStaticValue() {
-            const checkbox = document.getElementById('useStaticValue');
-            const input = document.getElementById('staticValue');
-            const groupBInputs = document.querySelectorAll('#tagType1B, #tagValue1B, #tagType2B, #tagValue2B, #tagType3B, #tagValue3B');
-            
-            if (checkbox.checked) {
-                input.style.display = 'block';
-                groupBInputs.forEach(el => el.disabled = true);
-            } else {
-                input.style.display = 'none';
-                groupBInputs.forEach(el => el.disabled = false);
-            }
+            const isChecked = document.getElementById('useStaticValue').checked;
+            document.getElementById('staticValue').classList.toggle('hidden', !isChecked);
+            // Блокируем выбор тегов для B, если юзаем статику
+            const bSelects = ['tagType1B', 'tagValue1B', 'tagType2B', 'tagValue2B', 'tagType3B', 'tagValue3B'];
+            bSelects.forEach(id => document.getElementById(id).disabled = isChecked);
         }
-        
-        // Filter data by tags and country
-        function filterData(data, tags, country) {
-            return data.filter(row => {
-                // Country filter
-                if (country && row['GEO'] !== country) return false;
-                
-                // Tag filters
-                for (const tag of tags) {
-                    if (tag.type && tag.value) {
-                        const columnName = tagTypeToColumn[tag.type];
-                        if (columnName && row[columnName]) {
-                            if (String(row[columnName]).toLowerCase() !== String(tag.value).toLowerCase()) {
-                                return false;
-                            }
-                        } else {
-                            return false;
-                        }
-                    }
+
+        // ОСНОВНАЯ ЛОГИКА ФИЛЬТРАЦИИ
+        function getFilteredData(groupPrefix, country) {
+            let tags = [];
+            for (let i = 1; i <= 3; i++) {
+                const type = document.getElementById(`tagType${i}${groupPrefix}`).value;
+                const val = document.getElementById(`tagValue${i}${groupPrefix}`).value;
+                if (type && val) tags.push({ type, val });
+            }
+
+            const hypId = groupPrefix === 'A' ? document.getElementById('hypothesisIdA').value : '';
+
+            return sheetsData.filter(row => {
+                // 1. Фильтр по стране
+                if (row['GEO'] !== country) return false;
+
+                // 2. Фильтр по ID Гипотезы (только для Группы А, если выбран)
+                if (groupPrefix === 'A' && hypId) {
+                    if (String(row['Hypothesis ID']) !== String(hypId)) return false;
                 }
-                
+
+                // 3. Фильтр по тегам
+                for (let tag of tags) {
+                    if (String(row[tag.type]).toLowerCase() !== String(tag.val).toLowerCase()) return false;
+                }
+
                 return true;
             });
         }
-        
-        // Apply data filter (e.g., Onboarded > 2)
-        function applyDataFilter(data) {
-            const filterMetric = document.getElementById('filterMetric').value;
-            const filterOperator = document.getElementById('filterOperator').value;
-            const filterValue = parseFloat(document.getElementById('filterValue').value) || 0;
-            
-            if (!filterMetric) return data;
-            
-            return data.filter(row => {
-                const value = parseFloat(row[filterMetric]) || 0;
-                switch (filterOperator) {
-                    case '>': return value > filterValue;
-                    case '<': return value < filterValue;
-                    case '=': return value === filterValue;
-                    case '>=': return value >= filterValue;
-                    case '<=': return value <= filterValue;
-                    default: return true;
-                }
-            });
-        }
-        
-        // Calculate metric for a dataset
+
         function calculateMetric(data, metric) {
             if (data.length === 0) return null;
-            
-            const totalSpent = data.reduce((sum, row) => sum + (parseFloat(row['Amount Spent']) || 0), 0);
-            const totalOnboarded = data.reduce((sum, row) => sum + (parseFloat(row['Onboarded']) || 0), 0);
-            const totalImpressions = data.reduce((sum, row) => sum + (parseFloat(row['Impressions']) || 0), 0);
-            const totalClicks = data.reduce((sum, row) => sum + (parseFloat(row['Link Clicks']) || 0), 0);
-            
+
+            const sum = (key) => data.reduce((acc, row) => acc + (parseFloat(row[key]) || 0), 0);
+
+            const spent = sum('Amount Spent');
+            const onboarded = sum('Onboarded');
+            const impressions = sum('Impressions');
+            const clicks = sum('Link Clicks');
+
             switch (metric) {
-                case 'CPA':
-                    return totalOnboarded > 0 ? totalSpent / totalOnboarded : null;
-                case 'CPM':
-                    return totalImpressions > 0 ? (totalSpent / totalImpressions) * 1000 : null;
-                case 'CTR':
-                    return totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : null;
-                case 'Onboarded':
-                    return totalOnboarded;
-                case 'Amount Spent':
-                    return totalSpent;
-                default:
-                    return null;
+                case 'CPA': return onboarded > 0 ? spent / onboarded : 0;
+                case 'CPM': return impressions > 0 ? (spent / impressions) * 1000 : 0;
+                case 'CTR': return impressions > 0 ? (clicks / impressions) * 100 : 0;
+                case 'Onboarded': return onboarded;
+                case 'Amount Spent': return spent;
+                default: return 0;
             }
         }
-        
-        // Check if hypothesis passed
-        function checkCondition(valueA, valueB, condition, conditionValue) {
-            if (valueA === null || valueB === null) return null;
-            
-            switch (condition) {
-                case 'greater':
-                    return valueA > valueB;
-                case 'less':
-                    return valueA < valueB;
-                case 'greaterPercent':
-                    return valueA > valueB * (1 + conditionValue / 100);
-                case 'lessPercent':
-                    return valueA < valueB * (1 - conditionValue / 100);
-                default:
-                    return null;
-            }
-        }
-        
-        // Run the hypothesis test
+
         function runHypothesisTest() {
-            // Get tags for Group A
-            const tagsA = [
-                { type: document.getElementById('tagType1A').value, value: document.getElementById('tagValue1A').value },
-                { type: document.getElementById('tagType2A').value, value: document.getElementById('tagValue2A').value },
-                { type: document.getElementById('tagType3A').value, value: document.getElementById('tagValue3A').value }
-            ].filter(t => t.type && t.value);
-            
-            // Get tags for Group B
-            const useStatic = document.getElementById('useStaticValue').checked;
-            const staticValue = parseFloat(document.getElementById('staticValue').value) || 0;
-            
-            const tagsB = useStatic ? [] : [
-                { type: document.getElementById('tagType1B').value, value: document.getElementById('tagValue1B').value },
-                { type: document.getElementById('tagType2B').value, value: document.getElementById('tagValue2B').value },
-                { type: document.getElementById('tagType3B').value, value: document.getElementById('tagValue3B').value }
-            ].filter(t => t.type && t.value);
-            
-            // Get selected countries
-            const countries = Array.from(document.querySelectorAll('.country-checkbox input:checked')).map(cb => cb.value);
-            
-            // Get settings
             const metric = document.getElementById('metric').value;
             const condition = document.getElementById('condition').value;
-            const conditionValue = parseFloat(document.getElementById('conditionValue').value) || 0;
-            
-            // Filter base data
-            const filteredData = applyDataFilter(sheetsData);
-            
-            // Calculate for each country
-            lastResults = [];
-            let successCount = 0;
-            
-            countries.forEach(country => {
-                const dataA = filterData(filteredData, tagsA, country);
-                const dataB = useStatic ? [] : filterData(filteredData, tagsB, country);
-                
-                const valueA = calculateMetric(dataA, metric);
-                const valueB = useStatic ? staticValue : calculateMetric(dataB, metric);
-                
-                const passed = checkCondition(valueA, valueB, condition, conditionValue);
-                if (passed) successCount++;
-                
-                const diff = valueA !== null && valueB !== null && valueB !== 0 
-                    ? ((valueA - valueB) / valueB * 100) 
-                    : null;
-                
-                lastResults.push({
-                    country,
-                    valueA,
-                    valueB,
-                    diff,
-                    passed,
-                    dataA,
-                    dataB
-                });
-            });
-            
-            // Display results
-            displayResults(lastResults, metric, successCount, countries.length);
-        }
-        
-        // Display results
-        function displayResults(results, metric, successCount, totalCount) {
-            document.getElementById('resultsSection').classList.remove('hidden');
-            
-            // Summary stats
-            const summaryHtml = `
-                <div class="stat-card">
-                    <div class="number">${successCount}/${totalCount}</div>
-                    <div class="label">Сработало</div>
-                </div>
-                <div class="stat-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
-                    <div class="number">${Math.round(successCount / totalCount * 100)}%</div>
-                    <div class="label">Успешность</div>
-                </div>
-            `;
-            document.getElementById('summaryStats').innerHTML = summaryHtml;
-            
-            // Results table
-            const tbody = document.getElementById('resultsBody');
-            tbody.innerHTML = '';
-            
-            results.forEach((result, index) => {
-                const formatValue = (v) => v !== null ? v.toFixed(2) : 'N/A';
-                const formatDiff = (d) => d !== null ? (d >= 0 ? '+' : '') + d.toFixed(1) + '%' : 'N/A';
-                
-                const resultClass = result.passed === true ? 'result-success' : 
-                                   result.passed === false ? 'result-fail' : '';
-                const resultText = result.passed === true ? '✅ Сработало' : 
-                                  result.passed === false ? '❌ Нет' : '⚠️ Нет данных';
-                
+            const useStatic = document.getElementById('useStaticValue').checked;
+            const staticVal = parseFloat(document.getElementById('staticValue').value) || 0;
+
+            const selectedCountries = Array.from(document.querySelectorAll('#countryList input:checked')).map(i => i.value);
+            const resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = '';
+
+            selectedCountries.forEach(country => {
+                const dataA = getFilteredData('A', country);
+                const valA = calculateMetric(dataA, metric);
+
+                let valB;
+                if (useStatic) {
+                    valB = staticVal;
+                } else {
+                    const dataB = getFilteredData('B', country);
+                    valB = calculateMetric(dataB, metric);
+                }
+
+                if (valA === null || (valB === null && !useStatic)) return;
+
+                const diff = valB !== 0 ? ((valA - valB) / valB * 100) : 0;
+
+                let isSuccess = false;
+                if (condition === 'less') isSuccess = valA < valB;
+                else isSuccess = valA > valB;
+
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><strong>${result.country}</strong></td>
-                    <td>${formatValue(result.valueA)}</td>
-                    <td>${formatValue(result.valueB)}</td>
-                    <td>${formatDiff(result.diff)}</td>
-                    <td class="${resultClass}">${resultText}</td>
-                    <td><button onclick="showDetails(${index})" style="padding: 5px 10px; cursor: pointer;">👁️ Детали</button></td>
+                    <td><strong>${country}</strong></td>
+                    <td>${valA.toFixed(2)}</td>
+                    <td>${valB.toFixed(2)}</td>
+                    <td style="color: ${diff > 0 ? 'red' : 'green'}">${diff > 0 ? '+' : ''}${diff.toFixed(1)}%</td>
+                    <td class="${isSuccess ? 'result-success' : 'result-fail'}">
+                        ${isSuccess ? '✅ Сработало' : '❌ Нет'}
+                    </td>
                 `;
-                tbody.appendChild(row);
+                resultsBody.appendChild(row);
             });
+
+            document.getElementById('resultsSection').classList.remove('hidden');
         }
-        
-        // Show details for a specific country
-        function showDetails(index) {
-            const result = lastResults[index];
-            document.getElementById('detailsSection').classList.remove('hidden');
-            document.getElementById('detailsTitle').textContent = `Детали для ${result.country}`;
-            
-            // Populate Group A table
-            const tbodyA = document.querySelector('#creativesTableA tbody');
-            tbodyA.innerHTML = '';
-            result.dataA.slice(0, 20).forEach(row => {
-                const spent = parseFloat(row['Amount Spent']) || 0;
-                const onb = parseFloat(row['Onboarded']) || 0;
-                const cpa = onb > 0 ? (spent / onb).toFixed(2) : 'N/A';
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row['Ad Name'] || 'N/A'}</td>
-                    <td>€${spent.toFixed(2)}</td>
-                    <td>${onb}</td>
-                    <td>${cpa}</td>
-                `;
-                tbodyA.appendChild(tr);
-            });
-            
-            // Populate Group B table
-            const tbodyB = document.querySelector('#creativesTableB tbody');
-            tbodyB.innerHTML = '';
-            result.dataB.slice(0, 20).forEach(row => {
-                const spent = parseFloat(row['Amount Spent']) || 0;
-                const onb = parseFloat(row['Onboarded']) || 0;
-                const cpa = onb > 0 ? (spent / onb).toFixed(2) : 'N/A';
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row['Ad Name'] || 'N/A'}</td>
-                    <td>€${spent.toFixed(2)}</td>
-                    <td>${onb}</td>
-                    <td>${cpa}</td>
-                `;
-                tbodyB.appendChild(tr);
-            });
-        }
-        
-        // Copy results to clipboard (tab-separated for Google Sheets)
-        function copyResultsToClipboard() {
-            const metric = document.getElementById('metric').value;
-            
-            // Header
-            let text = `Страна\tЗначение A\tЗначение B\tРазница %\tРезультат\n`;
-            
-            // Data rows
-            lastResults.forEach(result => {
-                const valueA = result.valueA !== null ? result.valueA.toFixed(2) : 'N/A';
-                const valueB = result.valueB !== null ? result.valueB.toFixed(2) : 'N/A';
-                const diff = result.diff !== null ? result.diff.toFixed(1) + '%' : 'N/A';
-                const passed = result.passed === true ? 'Сработало' : 
-                              result.passed === false ? 'Не сработало' : 'Нет данных';
-                
-                text += `${result.country}\t${valueA}\t${valueB}\t${diff}\t${passed}\n`;
-            });
-            
-            navigator.clipboard.writeText(text).then(() => {
-                const notification = document.getElementById('copyNotification');
-                notification.classList.add('show');
-                setTimeout(() => notification.classList.remove('show'), 2000);
-            });
-        }
-        
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            initTagDropdowns();
-            
-            // Restore saved URL
-            const savedUrl = localStorage.getItem('sheetsScriptUrl');
-            if (savedUrl) {
-                document.getElementById('scriptUrl').value = savedUrl;
-            }
-        });
+
+        window.onload = () => {
+            const saved = localStorage.getItem('sheetsScriptUrl');
+            if (saved) document.getElementById('scriptUrl').value = saved;
+        };
     </script>
 </body>
+
 </html>
