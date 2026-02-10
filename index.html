@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -138,7 +138,7 @@
             margin-bottom: 12px;
         }
         
-        .tag-row select, .tag-row input {
+        .tag-row select {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 6px;
@@ -190,32 +190,6 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
-        }
-        
-        .countries-select {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .country-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: #f0f4f8;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .country-checkbox:hover {
-            background: #e1e8f0;
-        }
-        
-        .country-checkbox input:checked + span {
-            font-weight: 600;
-            color: #4472C4;
         }
         
         .filter-row {
@@ -399,6 +373,15 @@
             cursor: pointer;
         }
         
+        .static-input {
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ffb74d;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
         .summary-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -424,6 +407,69 @@
             opacity: 0.9;
         }
         
+        .result-box {
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .result-box.success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 2px solid #28a745;
+        }
+        
+        .result-box.fail {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border: 2px solid #dc3545;
+        }
+        
+        .result-box.nodata {
+            background: linear-gradient(135deg, #fff3cd, #ffeeba);
+            border: 2px solid #ffc107;
+        }
+        
+        .result-box .icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        
+        .result-box .title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .result-box .details {
+            font-size: 16px;
+            color: #555;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .comparison-table td {
+            padding: 15px;
+            text-align: center;
+            width: 50%;
+        }
+        
+        .comparison-table .value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .comparison-table .label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .group-a-value { color: #2e7d32; }
+        .group-b-value { color: #e65100; }
+
         #copyNotification {
             position: fixed;
             bottom: 30px;
@@ -476,7 +522,7 @@
                 <div class="group-card group-a">
                     <h3>🅰️ Группа A (тестируем)</h3>
                     
-                    <!-- Hypothesis ID - только в группе A -->
+                    <!-- Hypothesis ID -->
                     <div class="hypothesis-row">
                         <label>📋 Hypothesis ID (опционально)</label>
                         <select id="hypothesisId">
@@ -546,9 +592,9 @@
                     <div class="static-value-section">
                         <label class="checkbox-label">
                             <input type="checkbox" id="useStaticValue" onchange="toggleStaticValue()">
-                            <span>Сравнить со статичным значением</span>
+                            <span>Сравнить со статичным значением (бенчмарк)</span>
                         </label>
-                        <input type="number" id="staticValue" placeholder="Введите значение" style="margin-top: 10px; display: none;">
+                        <input type="number" id="staticValue" class="static-input" placeholder="Введите бенчмарк" style="display: none;">
                     </div>
                 </div>
             </div>
@@ -559,42 +605,16 @@
                 
                 <div class="settings-grid">
                     <div class="setting-item">
-                        <label>Страны</label>
-                        <div class="countries-select">
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="EU" checked>
-                                <span>EU</span>
-                            </label>
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="DE">
-                                <span>DE</span>
-                            </label>
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="FR">
-                                <span>FR</span>
-                            </label>
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="IT">
-                                <span>IT</span>
-                            </label>
-                            <label class="country-checkbox">
-                                <input type="checkbox" value="NL">
-                                <span>NL</span>
-                            </label>
-                        </div>
+                        <label>Метрика сравнения</label>
+                        <select id="metric">
+                            <option value="CTR">CTR (Click-through Rate)</option>
+                            <option value="CPA_Onboarded">CPA Onboarded</option>
+                            <option value="CPA_Account_Open">CPA Account Open</option>
+                            <option value="CPA_Onboarded_2">CPA Onboarded (Onb>2)</option>
+                            <option value="CR">CR (Account/Onboarded) %</option>
+                            <option value="ThruPlay_Rate">ThruPlay Rate %</option>
+                        </select>
                     </div>
-                    
-                  <div class="setting-item">
-                    <label>Метрика сравнения</label>
-                    <select id="metric">
-                        <option value="CTR">CTR (Click-through Rate)</option>
-                        <option value="CPA_Onboarded">CPA Onboarded</option>
-                        <option value="CPA_Account_Open">CPA Account Open</option>
-                        <option value="CPA_Onboarded_2">CPA Onboarded (Onb>2)</option>
-                        <option value="CR">CR (Account/Onboarded)</option>
-                        <option value="ThruPlay_Rate">ThruPlay Rate</option>
-                    </select>
-                </div>
                     
                     <div class="setting-item">
                         <label>Условие</label>
@@ -642,31 +662,16 @@
         
         <!-- Results -->
         <div class="card hidden" id="resultsSection">
-            <h2>📊 Результаты <button class="btn-copy" onclick="copyResultsToClipboard()">📋 Копировать для Sheets</button></h2>
+            <h2>📊 Результат <button class="btn-copy" onclick="copyResultsToClipboard()">📋 Копировать</button></h2>
             
-            <div class="summary-stats" id="summaryStats"></div>
+            <div id="resultBox"></div>
             
-            <table class="results-table">
-                <thead>
-                    <tr>
-                        <th>Страна</th>
-                        <th>Значение A</th>
-                        <th>Значение B</th>
-                        <th>Разница</th>
-                        <th>Результат</th>
-                        <th>Действие</th>
-                    </tr>
-                </thead>
-                <tbody id="resultsBody">
-                </tbody>
-            </table>
-            
-            <div class="details-section hidden" id="detailsSection">
-                <h4 id="detailsTitle">Детали</h4>
+            <div class="details-section" id="detailsSection">
+                <h4>📋 Детали по креативам</h4>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                     <div>
-                        <h5 style="color: #2e7d32; margin-bottom: 10px;">Группа A креативы:</h5>
+                        <h5 style="color: #2e7d32; margin-bottom: 10px;">Группа A (<span id="countA">0</span> креативов):</h5>
                         <table class="creatives-table" id="creativesTableA">
                             <thead>
                                 <tr>
@@ -680,8 +685,8 @@
                         </table>
                     </div>
                     
-                    <div>
-                        <h5 style="color: #e65100; margin-bottom: 10px;">Группа B креативы:</h5>
+                    <div id="groupBDetails">
+                        <h5 style="color: #e65100; margin-bottom: 10px;">Группа B (<span id="countB">0</span> креативов):</h5>
                         <table class="creatives-table" id="creativesTableB">
                             <thead>
                                 <tr>
@@ -706,10 +711,9 @@
         let sheetsData = [];
         let tagConfig = {};
         let hypothesisIds = [];
-        let lastResults = [];
+        let lastResult = null;
         
         // Маппинг типов тегов на колонки в Combined_results
-        // Ключ = название колонки в Config, Значение = название колонки в Combined_results
         const tagTypeToColumn = {
             'GEO': 'GEO',
             'Language': 'Language',
@@ -730,7 +734,7 @@
             'Visual_Tag': 'Visual Tag 1'
         };
         
-        // Initialize tag type dropdowns (статические опции до загрузки данных)
+        // Initialize tag type dropdowns
         function initTagDropdowns() {
             const selects = ['tagType1A', 'tagType2A', 'tagType3A', 'tagType1B', 'tagType2B', 'tagType3B'];
             const defaultOptions = Object.keys(tagTypeToColumn);
@@ -750,7 +754,6 @@
             const valueSelect = document.getElementById(valueSelectId);
             const selectedType = typeSelect.value;
             
-            // Очистить текущие опции
             valueSelect.innerHTML = '<option value="">-- Выберите значение --</option>';
             
             if (!selectedType) {
@@ -758,7 +761,6 @@
                 return;
             }
             
-            // Получить значения из tagConfig
             const values = tagConfig[selectedType] || [];
             
             if (values.length === 0) {
@@ -820,22 +822,17 @@
                     throw new Error(data.error);
                 }
                 
-                // Сохраняем данные
                 sheetsData = data.adsData || [];
                 tagConfig = data.tagConfig || {};
                 hypothesisIds = data.hypothesisIds || [];
                 
-                // Обновляем дропдауны типов на основе реальных данных из Config
                 updateTypeDropdownsFromConfig();
-                
-                // Обновляем дропдаун гипотез
                 updateHypothesisDropdown();
                 
                 status.textContent = `Подключено (${sheetsData.length} строк)`;
                 status.className = 'status-badge status-connected';
                 document.getElementById('runTest').disabled = false;
                 
-                // Save URL to localStorage
                 localStorage.setItem('sheetsScriptUrl', url);
                 
             } catch (error) {
@@ -861,7 +858,6 @@
                     select.innerHTML += `<option value="${key}">${key}</option>`;
                 });
                 
-                // Восстановить выбранное значение если оно есть в новых опциях
                 if (currentValue && configKeys.includes(currentValue)) {
                     select.value = currentValue;
                 }
@@ -885,21 +881,15 @@
         
         // Получить колонку в Combined_results для данного типа из Config
         function getColumnForType(configKey) {
-            // Сначала проверяем маппинг
             if (tagTypeToColumn[configKey]) {
                 return tagTypeToColumn[configKey];
             }
-            // Если нет в маппинге, возвращаем как есть (на случай если колонки совпадают)
             return configKey;
         }
         
-        // Filter data by tags and country
-        function filterData(data, tags, country) {
+        // Filter data by tags
+        function filterData(data, tags) {
             return data.filter(row => {
-                // Country filter
-                if (country && row['GEO'] !== country) return false;
-                
-                // Tag filters
                 for (const tag of tags) {
                     if (tag.type && tag.value) {
                         const columnName = getColumnForType(tag.type);
@@ -912,7 +902,6 @@
                         }
                     }
                 }
-                
                 return true;
             });
         }
@@ -923,7 +912,7 @@
             return data.filter(row => row['Hypothesis ID'] === hypId);
         }
         
-        // Apply data filter (e.g., Onboarded > 2)
+        // Apply data filter
         function applyDataFilter(data) {
             const filterMetric = document.getElementById('filterMetric').value;
             const filterOperator = document.getElementById('filterOperator').value;
@@ -944,44 +933,45 @@
             });
         }
         
-// Calculate metric for a dataset
-function calculateMetric(data, metric) {
-    if (data.length === 0) return null;
-    
-    // Для CPA Onboarded (Onb>2) — фильтруем данные
-    let filteredData = data;
-    if (metric === 'CPA_Onboarded_2') {
-        filteredData = data.filter(row => (parseFloat(row['Onboarded']) || 0) > 2);
-        if (filteredData.length === 0) return null;
-    }
-    
-    const totalSpent = filteredData.reduce((sum, row) => sum + (parseFloat(row['Amount Spent']) || 0), 0);
-    const totalOnboarded = filteredData.reduce((sum, row) => sum + (parseFloat(row['Onboarded']) || 0), 0);
-    const totalAccountOpened = filteredData.reduce((sum, row) => sum + (parseFloat(row['OBA: Account Opened']) || 0), 0);
-    const totalImpressions = filteredData.reduce((sum, row) => sum + (parseFloat(row['Impressions']) || 0), 0);
-    const totalThruPlays = filteredData.reduce((sum, row) => sum + (parseFloat(row['ThruPlays']) || 0), 0);
-    
-    // CTR берём напрямую из колонки и усредняем
-    const ctrValues = filteredData.map(row => parseFloat(row['CTR (Link Click-Through Rate)']) || 0);
-    const avgCTR = ctrValues.length > 0 ? ctrValues.reduce((a, b) => a + b, 0) / ctrValues.length : null;
-    
-    switch (metric) {
-        case 'CTR':
-            return avgCTR;
-        case 'CPA_Onboarded':
-            return totalOnboarded > 0 ? totalSpent / totalOnboarded : null;
-        case 'CPA_Account_Open':
-            return totalAccountOpened > 0 ? totalSpent / totalAccountOpened : null;
-        case 'CPA_Onboarded_2':
-            return totalOnboarded > 0 ? totalSpent / totalOnboarded : null;
-        case 'CR':
-            return totalOnboarded > 0 ? (totalAccountOpened / totalOnboarded) * 100 : null;
-        case 'ThruPlay_Rate':
-            return totalImpressions > 0 ? (totalThruPlays / totalImpressions) * 100 : null;
-        default:
-            return null;
-    }
-}       
+        // Calculate metric for a dataset
+        function calculateMetric(data, metric) {
+            if (data.length === 0) return null;
+            
+            // Для CPA Onboarded (Onb>2) — фильтруем данные
+            let filteredData = data;
+            if (metric === 'CPA_Onboarded_2') {
+                filteredData = data.filter(row => (parseFloat(row['Onboarded']) || 0) > 2);
+                if (filteredData.length === 0) return null;
+            }
+            
+            const totalSpent = filteredData.reduce((sum, row) => sum + (parseFloat(row['Amount Spent']) || 0), 0);
+            const totalOnboarded = filteredData.reduce((sum, row) => sum + (parseFloat(row['Onboarded']) || 0), 0);
+            const totalAccountOpened = filteredData.reduce((sum, row) => sum + (parseFloat(row['OBA: Account Opened']) || 0), 0);
+            const totalImpressions = filteredData.reduce((sum, row) => sum + (parseFloat(row['Impressions']) || 0), 0);
+            const totalThruPlays = filteredData.reduce((sum, row) => sum + (parseFloat(row['ThruPlays']) || 0), 0);
+            
+            // CTR берём напрямую из колонки и усредняем
+            const ctrValues = filteredData.map(row => parseFloat(row['CTR (Link Click-Through Rate)']) || 0).filter(v => v > 0);
+            const avgCTR = ctrValues.length > 0 ? ctrValues.reduce((a, b) => a + b, 0) / ctrValues.length : null;
+            
+            switch (metric) {
+                case 'CTR':
+                    return avgCTR;
+                case 'CPA_Onboarded':
+                    return totalOnboarded > 0 ? totalSpent / totalOnboarded : null;
+                case 'CPA_Account_Open':
+                    return totalAccountOpened > 0 ? totalSpent / totalAccountOpened : null;
+                case 'CPA_Onboarded_2':
+                    return totalOnboarded > 0 ? totalSpent / totalOnboarded : null;
+                case 'CR':
+                    return totalOnboarded > 0 ? (totalAccountOpened / totalOnboarded) * 100 : null;
+                case 'ThruPlay_Rate':
+                    return totalImpressions > 0 ? (totalThruPlays / totalImpressions) * 100 : null;
+                default:
+                    return null;
+            }
+        }
+        
         // Check if hypothesis passed
         function checkCondition(valueA, valueB, condition, conditionValue) {
             if (valueA === null || valueB === null) return null;
@@ -1000,9 +990,33 @@ function calculateMetric(data, metric) {
             }
         }
         
+        // Get metric display name
+        function getMetricName(metric) {
+            const names = {
+                'CTR': 'CTR',
+                'CPA_Onboarded': 'CPA Onboarded',
+                'CPA_Account_Open': 'CPA Account Open',
+                'CPA_Onboarded_2': 'CPA Onboarded (Onb>2)',
+                'CR': 'CR (Account/Onboarded)',
+                'ThruPlay_Rate': 'ThruPlay Rate'
+            };
+            return names[metric] || metric;
+        }
+        
+        // Format value based on metric
+        function formatValue(value, metric) {
+            if (value === null) return 'N/A';
+            
+            if (metric.includes('CPA')) {
+                return '€' + value.toFixed(2);
+            } else if (metric === 'CR' || metric === 'ThruPlay_Rate' || metric === 'CTR') {
+                return value.toFixed(2) + '%';
+            }
+            return value.toFixed(2);
+        }
+        
         // Run the hypothesis test
         function runHypothesisTest() {
-            // Get Hypothesis ID filter
             const hypId = document.getElementById('hypothesisId').value;
             
             // Get tags for Group A
@@ -1022,9 +1036,6 @@ function calculateMetric(data, metric) {
                 { type: document.getElementById('tagType3B').value, value: document.getElementById('tagValue3B').value }
             ].filter(t => t.type && t.value);
             
-            // Get selected countries
-            const countries = Array.from(document.querySelectorAll('.country-checkbox input:checked')).map(cb => cb.value);
-            
             // Get settings
             const metric = document.getElementById('metric').value;
             const condition = document.getElementById('condition').value;
@@ -1032,93 +1043,90 @@ function calculateMetric(data, metric) {
             
             // Filter base data
             let filteredData = applyDataFilter(sheetsData);
-            
-            // Apply hypothesis filter if selected
             filteredData = filterByHypothesis(filteredData, hypId);
             
-            // Calculate for each country
-            lastResults = [];
-            let successCount = 0;
+            // Get data for groups
+            const dataA = filterData(filteredData, tagsA);
+            const dataB = useStatic ? [] : filterData(filteredData, tagsB);
             
-            countries.forEach(country => {
-                const dataA = filterData(filteredData, tagsA, country);
-                const dataB = useStatic ? [] : filterData(filteredData, tagsB, country);
-                
-                const valueA = calculateMetric(dataA, metric);
-                const valueB = useStatic ? staticValue : calculateMetric(dataB, metric);
-                
-                const passed = checkCondition(valueA, valueB, condition, conditionValue);
-                if (passed) successCount++;
-                
-                const diff = valueA !== null && valueB !== null && valueB !== 0 
-                    ? ((valueA - valueB) / valueB * 100) 
-                    : null;
-                
-                lastResults.push({
-                    country,
-                    valueA,
-                    valueB,
-                    diff,
-                    passed,
-                    dataA,
-                    dataB
-                });
-            });
+            // Calculate metrics
+            const valueA = calculateMetric(dataA, metric);
+            const valueB = useStatic ? staticValue : calculateMetric(dataB, metric);
+            
+            // Check condition
+            const passed = checkCondition(valueA, valueB, condition, conditionValue);
+            
+            // Calculate difference
+            const diff = valueA !== null && valueB !== null && valueB !== 0 
+                ? ((valueA - valueB) / valueB * 100) 
+                : null;
+            
+            // Store result
+            lastResult = {
+                valueA,
+                valueB,
+                diff,
+                passed,
+                dataA,
+                dataB,
+                metric,
+                useStatic
+            };
             
             // Display results
-            displayResults(lastResults, metric, successCount, countries.length);
+            displayResults(lastResult);
         }
         
         // Display results
-        function displayResults(results, metric, successCount, totalCount) {
+        function displayResults(result) {
             document.getElementById('resultsSection').classList.remove('hidden');
             
-            // Summary stats
-            const summaryHtml = `
-                <div class="stat-card">
-                    <div class="number">${successCount}/${totalCount}</div>
-                    <div class="label">Сработало</div>
-                </div>
-                <div class="stat-card" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
-                    <div class="number">${Math.round(successCount / totalCount * 100)}%</div>
-                    <div class="label">Успешность</div>
+            const metric = result.metric;
+            const metricName = getMetricName(metric);
+            
+            // Result box
+            let boxClass, icon, title;
+            if (result.passed === true) {
+                boxClass = 'success';
+                icon = '✅';
+                title = 'Гипотеза подтверждена!';
+            } else if (result.passed === false) {
+                boxClass = 'fail';
+                icon = '❌';
+                title = 'Гипотеза не подтверждена';
+            } else {
+                boxClass = 'nodata';
+                icon = '⚠️';
+                title = 'Недостаточно данных';
+            }
+            
+            const diffText = result.diff !== null 
+                ? `Разница: ${result.diff >= 0 ? '+' : ''}${result.diff.toFixed(1)}%` 
+                : '';
+            
+            document.getElementById('resultBox').innerHTML = `
+                <div class="result-box ${boxClass}">
+                    <div class="icon">${icon}</div>
+                    <div class="title">${title}</div>
+                    <div class="details">${metricName}: ${diffText}</div>
+                    
+                    <table class="comparison-table">
+                        <tr>
+                            <td>
+                                <div class="value group-a-value">${formatValue(result.valueA, metric)}</div>
+                                <div class="label">Группа A (${result.dataA.length} креативов)</div>
+                            </td>
+                            <td>
+                                <div class="value group-b-value">${formatValue(result.valueB, metric)}</div>
+                                <div class="label">${result.useStatic ? 'Бенчмарк' : 'Группа B (' + result.dataB.length + ' креативов)'}</div>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             `;
-            document.getElementById('summaryStats').innerHTML = summaryHtml;
             
-            // Results table
-            const tbody = document.getElementById('resultsBody');
-            tbody.innerHTML = '';
-            
-            results.forEach((result, index) => {
-                const formatValue = (v) => v !== null ? v.toFixed(2) : 'N/A';
-                const formatDiff = (d) => d !== null ? (d >= 0 ? '+' : '') + d.toFixed(1) + '%' : 'N/A';
-                
-                const resultClass = result.passed === true ? 'result-success' : 
-                                   result.passed === false ? 'result-fail' : '';
-                const resultText = result.passed === true ? '✅ Сработало' : 
-                                  result.passed === false ? '❌ Нет' : '⚠️ Нет данных';
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${result.country}</strong></td>
-                    <td>${formatValue(result.valueA)}</td>
-                    <td>${formatValue(result.valueB)}</td>
-                    <td>${formatDiff(result.diff)}</td>
-                    <td class="${resultClass}">${resultText}</td>
-                    <td><button onclick="showDetails(${index})" style="padding: 5px 10px; cursor: pointer;">👁️ Детали</button></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-        
-        // Show details for a specific country
-        function showDetails(index) {
-            const result = lastResults[index];
-            document.getElementById('detailsSection').classList.remove('hidden');
-            document.getElementById('detailsTitle').textContent = `Детали для ${result.country}`;
-            
-            // Populate Group A table
+            // Group A table
+            document.getElementById('countA').textContent = result.dataA.length;
             const tbodyA = document.querySelector('#creativesTableA tbody');
             tbodyA.innerHTML = '';
             result.dataA.slice(0, 20).forEach(row => {
@@ -1136,42 +1144,50 @@ function calculateMetric(data, metric) {
                 tbodyA.appendChild(tr);
             });
             
-            // Populate Group B table
-            const tbodyB = document.querySelector('#creativesTableB tbody');
-            tbodyB.innerHTML = '';
-            result.dataB.slice(0, 20).forEach(row => {
-                const spent = parseFloat(row['Amount Spent']) || 0;
-                const onb = parseFloat(row['Onboarded']) || 0;
-                const cpa = onb > 0 ? (spent / onb).toFixed(2) : 'N/A';
-                
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row['Ad Name'] || 'N/A'}</td>
-                    <td>€${spent.toFixed(2)}</td>
-                    <td>${onb}</td>
-                    <td>${cpa}</td>
-                `;
-                tbodyB.appendChild(tr);
-            });
+            // Group B table (hide if static)
+            const groupBDetails = document.getElementById('groupBDetails');
+            if (result.useStatic) {
+                groupBDetails.style.display = 'none';
+            } else {
+                groupBDetails.style.display = 'block';
+                document.getElementById('countB').textContent = result.dataB.length;
+                const tbodyB = document.querySelector('#creativesTableB tbody');
+                tbodyB.innerHTML = '';
+                result.dataB.slice(0, 20).forEach(row => {
+                    const spent = parseFloat(row['Amount Spent']) || 0;
+                    const onb = parseFloat(row['Onboarded']) || 0;
+                    const cpa = onb > 0 ? (spent / onb).toFixed(2) : 'N/A';
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row['Ad Name'] || 'N/A'}</td>
+                        <td>€${spent.toFixed(2)}</td>
+                        <td>${onb}</td>
+                        <td>${cpa}</td>
+                    `;
+                    tbodyB.appendChild(tr);
+                });
+            }
         }
         
-        // Copy results to clipboard (tab-separated for Google Sheets)
+        // Copy results to clipboard
         function copyResultsToClipboard() {
-            const metric = document.getElementById('metric').value;
+            if (!lastResult) return;
             
-            // Header
-            let text = `Страна\tЗначение A\tЗначение B\tРазница %\tРезультат\n`;
+            const metric = getMetricName(lastResult.metric);
+            const valueA = formatValue(lastResult.valueA, lastResult.metric);
+            const valueB = formatValue(lastResult.valueB, lastResult.metric);
+            const diff = lastResult.diff !== null ? lastResult.diff.toFixed(1) + '%' : 'N/A';
+            const passed = lastResult.passed === true ? 'Да' : 
+                          lastResult.passed === false ? 'Нет' : 'Нет данных';
             
-            // Data rows
-            lastResults.forEach(result => {
-                const valueA = result.valueA !== null ? result.valueA.toFixed(2) : 'N/A';
-                const valueB = result.valueB !== null ? result.valueB.toFixed(2) : 'N/A';
-                const diff = result.diff !== null ? result.diff.toFixed(1) + '%' : 'N/A';
-                const passed = result.passed === true ? 'Сработало' : 
-                              result.passed === false ? 'Не сработало' : 'Нет данных';
-                
-                text += `${result.country}\t${valueA}\t${valueB}\t${diff}\t${passed}\n`;
-            });
+            const text = `Метрика\t${metric}
+Группа A\t${valueA}
+Группа B\t${valueB}
+Разница\t${diff}
+Подтверждена\t${passed}
+Креативов A\t${lastResult.dataA.length}
+Креативов B\t${lastResult.dataB.length}`;
             
             navigator.clipboard.writeText(text).then(() => {
                 const notification = document.getElementById('copyNotification');
@@ -1184,7 +1200,6 @@ function calculateMetric(data, metric) {
         document.addEventListener('DOMContentLoaded', () => {
             initTagDropdowns();
             
-            // Restore saved URL
             const savedUrl = localStorage.getItem('sheetsScriptUrl');
             if (savedUrl) {
                 document.getElementById('scriptUrl').value = savedUrl;
