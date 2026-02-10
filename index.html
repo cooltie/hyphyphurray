@@ -584,16 +584,17 @@
                         </div>
                     </div>
                     
-                    <div class="setting-item">
-                        <label>Метрика сравнения</label>
-                        <select id="metric">
-                            <option value="CPA">CPA (Cost per Onboarded)</option>
-                            <option value="CPM">CPM (Cost per 1000 Impressions)</option>
-                            <option value="CTR">CTR (Click-through Rate)</option>
-                            <option value="Onboarded">Onboarded (количество)</option>
-                            <option value="Amount Spent">Amount Spent (€)</option>
-                        </select>
-                    </div>
+                  <div class="setting-item">
+                    <label>Метрика сравнения</label>
+                    <select id="metric">
+                        <option value="CTR">CTR (Click-through Rate)</option>
+                        <option value="CPA_Onboarded">CPA Onboarded</option>
+                        <option value="CPA_Account_Open">CPA Account Open</option>
+                        <option value="CPA_Onboarded_2">CPA Onboarded (Onb>2)</option>
+                        <option value="CR">CR (Account/Onboarded)</option>
+                        <option value="ThruPlay_Rate">ThruPlay Rate</option>
+                    </select>
+                </div>
                     
                     <div class="setting-item">
                         <label>Условие</label>
@@ -943,31 +944,44 @@
             });
         }
         
-        // Calculate metric for a dataset
-        function calculateMetric(data, metric) {
-            if (data.length === 0) return null;
-            
-            const totalSpent = data.reduce((sum, row) => sum + (parseFloat(row['Amount Spent']) || 0), 0);
-            const totalOnboarded = data.reduce((sum, row) => sum + (parseFloat(row['Onboarded']) || 0), 0);
-            const totalImpressions = data.reduce((sum, row) => sum + (parseFloat(row['Impressions']) || 0), 0);
-            const totalClicks = data.reduce((sum, row) => sum + (parseFloat(row['Link Clicks']) || 0), 0);
-            
-            switch (metric) {
-                case 'CPA':
-                    return totalOnboarded > 0 ? totalSpent / totalOnboarded : null;
-                case 'CPM':
-                    return totalImpressions > 0 ? (totalSpent / totalImpressions) * 1000 : null;
-                case 'CTR':
-                    return totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : null;
-                case 'Onboarded':
-                    return totalOnboarded;
-                case 'Amount Spent':
-                    return totalSpent;
-                default:
-                    return null;
-            }
-        }
-        
+// Calculate metric for a dataset
+function calculateMetric(data, metric) {
+    if (data.length === 0) return null;
+    
+    // Для CPA Onboarded (Onb>2) — фильтруем данные
+    let filteredData = data;
+    if (metric === 'CPA_Onboarded_2') {
+        filteredData = data.filter(row => (parseFloat(row['Onboarded']) || 0) > 2);
+        if (filteredData.length === 0) return null;
+    }
+    
+    const totalSpent = filteredData.reduce((sum, row) => sum + (parseFloat(row['Amount Spent']) || 0), 0);
+    const totalOnboarded = filteredData.reduce((sum, row) => sum + (parseFloat(row['Onboarded']) || 0), 0);
+    const totalAccountOpened = filteredData.reduce((sum, row) => sum + (parseFloat(row['OBA: Account Opened']) || 0), 0);
+    const totalImpressions = filteredData.reduce((sum, row) => sum + (parseFloat(row['Impressions']) || 0), 0);
+    const totalThruPlays = filteredData.reduce((sum, row) => sum + (parseFloat(row['ThruPlays']) || 0), 0);
+    
+    // CTR берём напрямую из колонки и усредняем
+    const ctrValues = filteredData.map(row => parseFloat(row['CTR (Link Click-Through Rate)']) || 0);
+    const avgCTR = ctrValues.length > 0 ? ctrValues.reduce((a, b) => a + b, 0) / ctrValues.length : null;
+    
+    switch (metric) {
+        case 'CTR':
+            return avgCTR;
+        case 'CPA_Onboarded':
+            return totalOnboarded > 0 ? totalSpent / totalOnboarded : null;
+        case 'CPA_Account_Open':
+            return totalAccountOpened > 0 ? totalSpent / totalAccountOpened : null;
+        case 'CPA_Onboarded_2':
+            return totalOnboarded > 0 ? totalSpent / totalOnboarded : null;
+        case 'CR':
+            return totalOnboarded > 0 ? (totalAccountOpened / totalOnboarded) * 100 : null;
+        case 'ThruPlay_Rate':
+            return totalImpressions > 0 ? (totalThruPlays / totalImpressions) * 100 : null;
+        default:
+            return null;
+    }
+}       
         // Check if hypothesis passed
         function checkCondition(valueA, valueB, condition, conditionValue) {
             if (valueA === null || valueB === null) return null;
