@@ -237,6 +237,21 @@
         .btn-copy:hover {
             background: #218838;
         }
+
+        .btn-analyze {
+            background: #6f42c1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .btn-analyze:hover {
+            background: #5a32a3;
+        }
         
         .results-table {
             width: 100%;
@@ -662,7 +677,10 @@
         
         <!-- Results -->
         <div class="card hidden" id="resultsSection">
-            <h2>📊 Результат <button class="btn-copy" onclick="copyResultsToClipboard()">📋 Копировать</button></h2>
+           <h2>📊 Результат 
+            <button class="btn-copy" onclick="copyResultsToClipboard()">📋 Копировать</button>
+            <button class="btn-analyze" onclick="goToTagAnalysis()">🔍 Анализ тегов →</button>
+          </h2>
             
             <div id="resultBox"></div>
             
@@ -1169,11 +1187,37 @@
                 });
             }
         }
+
         
-        // Copy results to clipboard
+                // Go to tag analysis page
+        function goToTagAnalysis() {
+            if (!lastResult || lastResult.dataA.length === 0) {
+                alert('Сначала запусти тест с данными в группе A');
+                return;
+            }
+            
+            // Сохраняем данные в localStorage для передачи
+            const analysisData = {
+                hypothesisId: document.getElementById('hypothesisId').value || null,
+                metric: lastResult.metric,
+                passed: lastResult.passed,
+                valueA: lastResult.valueA,
+                valueB: lastResult.valueB,
+                diff: lastResult.diff,
+                creatives: lastResult.dataA
+            };
+            
+            localStorage.setItem('tagAnalysisData', JSON.stringify(analysisData));
+            
+            // Переход на страницу анализа
+            window.location.href = 'tag_analysis.html';
+        }
+        
+           // Copy results to clipboard
         function copyResultsToClipboard() {
             if (!lastResult) return;
             
+            const hypId = document.getElementById('hypothesisId').value || 'N/A';
             const metric = getMetricName(lastResult.metric);
             const valueA = formatValue(lastResult.valueA, lastResult.metric);
             const valueB = formatValue(lastResult.valueB, lastResult.metric);
@@ -1181,13 +1225,14 @@
             const passed = lastResult.passed === true ? 'Да' : 
                           lastResult.passed === false ? 'Нет' : 'Нет данных';
             
-            const text = `Метрика\t${metric}
-Группа A\t${valueA}
-Группа B\t${valueB}
-Разница\t${diff}
-Подтверждена\t${passed}
-Креативов A\t${lastResult.dataA.length}
-Креативов B\t${lastResult.dataB.length}`;
+            const text = `Hypothesis ID\t${hypId}
+        Метрика\t${metric}
+        Группа A\t${valueA}
+        Группа B\t${valueB}
+        Разница\t${diff}
+        Подтверждена\t${passed}
+        Креативов A\t${lastResult.dataA.length}
+        Креативов B\t${lastResult.dataB.length}`;
             
             navigator.clipboard.writeText(text).then(() => {
                 const notification = document.getElementById('copyNotification');
@@ -1205,6 +1250,10 @@
                 document.getElementById('scriptUrl').value = savedUrl;
             }
         });
+
+
+
+        
     </script>
 </body>
 </html>
