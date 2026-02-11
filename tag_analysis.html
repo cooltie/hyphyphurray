@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tag Analysis</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #6f42c1, #4a2c82);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+        }
+        
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .card h2 {
+            font-size: 18px;
+            color: #6f42c1;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8ecf1;
+        }
+        
+        .test-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .summary-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .summary-item .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .summary-item .value.success { color: #28a745; }
+        .summary-item .value.fail { color: #dc3545; }
+        
+        .tag-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .tag-category {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .tag-category h3 {
+            font-size: 14px;
+            color: #6f42c1;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tag-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .tag-item:last-child {
+            border-bottom: none;
+        }
+        
+        .tag-name {
+            font-weight: 500;
+        }
+        
+        .tag-stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tag-count {
+            background: #6f42c1;
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .tag-percent {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .tag-bar {
+            width: 60px;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .tag-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6f42c1, #9b6dd7);
+            border-radius: 3px;
+        }
+        
+        .ai-section {
+            margin-top: 30px;
+        }
+        
+        .btn-ai {
+            background: linear-gradient(135deg, #00b4d8, #0077b6);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .btn-ai:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 180, 216, 0.4);
+        }
+        
+        .btn-ai:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .ai-response {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            padding: 25px;
+            display: none;
+        }
+        
+        .ai-response.visible {
+            display: block;
+        }
+        
+        .ai-response h4 {
+            color: #0077b6;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ai-response .content {
+            white-space: pre-wrap;
+            line-height: 1.8;
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-back:hover {
+            background: #545b62;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .no-data h2 {
+            color: #999;
+            margin-bottom: 15px;
+        }
+        
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loader.visible {
+            display: block;
+        }
+        
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e8ecf1;
+            border-top-color: #00b4d8;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .empty-category {
+            color: #999;
+            font-style: italic;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏷️ Tag Analysis</h1>
+            <p>Анализ тегов креативов и AI инсайты</p>
+        </header>
+        
+        <!-- No Data State -->
+        <div class="card no-data" id="noDataSection">
+            <h2>⚠️ Нет данных для анализа</h2>
+            <p>Сначала запусти тест гипотезы и нажми "Анализ тегов"</p>
+            <br>
+            <a href="hypothesis_tester_v3.html" class="btn-back">← Вернуться к тестированию</a>
+        </div>
+        
+        <!-- Main Content -->
+        <div id="mainContent" style="display: none;">
+            
+            <!-- Test Summary -->
+            <div class="card">
+                <h2>📊 Результат теста</h2>
+                <div class="test-summary">
+                    <div class="summary-item">
+                        <div class="label">Hypothesis ID</div>
+                        <div class="value" id="summaryHypId">-</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Метрика</div>
+                        <div class="value" id="summaryMetric">-</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Значение A</div>
+                        <div class="value" id="summaryValueA">-</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Значение B</div>
+                        <div class="value" id="summaryValueB">-</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Разница</div>
+                        <div class="value" id="summaryDiff">-</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Результат</div>
+                        <div class="value" id="summaryResult">-</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="label">Креативов</div>
+                        <div class="value" id="summaryCount">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tag Statistics -->
+            <div class="card">
+                <h2>🏷️ Статистика тегов (<span id="totalCreatives">0</span> креативов)</h2>
+                <div class="tag-categories" id="tagCategories">
+                    <!-- Заполняется динамически -->
+                </div>
+            </div>
+            
+            <!-- AI Insights -->
+            <div class="card ai-section">
+                <h2>🤖 AI Инсайты</h2>
+                
+                <button class="btn-ai" id="btnGetInsights" onclick="getAIInsights()">
+                    ✨ Получить AI инсайты
+                </button>
+                
+                <div class="loader" id="aiLoader">
+                    <div class="loader-spinner"></div>
+                    <div>Анализирую данные...</div>
+                </div>
+                
+                <div class="ai-response" id="aiResponse">
+                    <h4>💡 Рекомендации</h4>
+                    <div class="content" id="aiContent"></div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <div style="margin-top: 20px;">
+                <a href="hypothesis_tester_v3.html" class="btn-back">← Вернуться к тестированию</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global data
+        let analysisData = null;
+        let tagStats = {};
+        
+        // Tag categories to analyze
+        const tagCategories = {
+            'GEO': 'GEO',
+            'Language': 'Language',
+            'Lane': 'Lane',
+            'Stage': 'Stage',
+            'Style': 'Style',
+            'Format': 'Format',
+            'Hook Tag': 'Hook Tag',
+            'Format Tag': 'Format Tag',
+            'Style Tag': 'Style Tag',
+            'CTA Tag': 'CTA Tag',
+            'Audience Tag': 'Audience Tag',
+            'Visual Tag 1': 'Visual Tag 1'
+        };
+        
+        // Metric names
+        const metricNames = {
+            'CTR': 'CTR',
+            'CPA_Onboarded': 'CPA Onboarded',
+            'CPA_Account_Open': 'CPA Account Open',
+            'CPA_Onboarded_2': 'CPA Onboarded (Onb>2)',
+            'CR': 'CR (Account/Onboarded)',
+            'ThruPlay_Rate': 'ThruPlay Rate'
+        };
+        
+        // Format value based on metric
+        function formatValue(value, metric) {
+            if (value === null || value === undefined) return 'N/A';
+            
+            if (metric && metric.includes('CPA')) {
+                return '€' + value.toFixed(2);
+            } else if (metric === 'CR' || metric === 'ThruPlay_Rate' || metric === 'CTR') {
+                return value.toFixed(2) + '%';
+            }
+            return value.toFixed(2);
+        }
+        
+        // Initialize page
+        function init() {
+            // Load data from localStorage
+            const dataStr = localStorage.getItem('tagAnalysisData');
+            
+            if (!dataStr) {
+                document.getElementById('noDataSection').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'none';
+                return;
+            }
+            
+            try {
+                analysisData = JSON.parse(dataStr);
+                
+                if (!analysisData.creatives || analysisData.creatives.length === 0) {
+                    document.getElementById('noDataSection').style.display = 'block';
+                    document.getElementById('mainContent').style.display = 'none';
+                    return;
+                }
+                
+                document.getElementById('noDataSection').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                displaySummary();
+                calculateTagStats();
+                displayTagStats();
+                
+            } catch (e) {
+                console.error('Error parsing data:', e);
+                document.getElementById('noDataSection').style.display = 'block';
+                document.getElementById('mainContent').style.display = 'none';
+            }
+        }
+        
+        // Display test summary
+        function displaySummary() {
+            document.getElementById('summaryHypId').textContent = analysisData.hypothesisId || 'N/A';
+            document.getElementById('summaryMetric').textContent = metricNames[analysisData.metric] || analysisData.metric;
+            document.getElementById('summaryValueA').textContent = formatValue(analysisData.valueA, analysisData.metric);
+            document.getElementById('summaryValueB').textContent = formatValue(analysisData.valueB, analysisData.metric);
+            
+            const diffEl = document.getElementById('summaryDiff');
+            if (analysisData.diff !== null) {
+                diffEl.textContent = (analysisData.diff >= 0 ? '+' : '') + analysisData.diff.toFixed(1) + '%';
+            } else {
+                diffEl.textContent = 'N/A';
+            }
+            
+            const resultEl = document.getElementById('summaryResult');
+            if (analysisData.passed === true) {
+                resultEl.textContent = '✅ Да';
+                resultEl.className = 'value success';
+            } else if (analysisData.passed === false) {
+                resultEl.textContent = '❌ Нет';
+                resultEl.className = 'value fail';
+            } else {
+                resultEl.textContent = '⚠️ N/A';
+                resultEl.className = 'value';
+            }
+            
+            document.getElementById('summaryCount').textContent = analysisData.creatives.length;
+            document.getElementById('totalCreatives').textContent = analysisData.creatives.length;
+        }
+        
+        // Calculate tag statistics
+        function calculateTagStats() {
+            tagStats = {};
+            const total = analysisData.creatives.length;
+            
+            // Initialize categories
+            for (const [key, label] of Object.entries(tagCategories)) {
+                tagStats[label] = {};
+            }
+            
+            // Count tags
+            analysisData.creatives.forEach(creative => {
+                for (const [key, label] of Object.entries(tagCategories)) {
+                    const value = creative[key];
+                    if (value && value !== '' && value !== 'N/A') {
+                        if (!tagStats[label][value]) {
+                            tagStats[label][value] = 0;
+                        }
+                        tagStats[label][value]++;
+                    }
+                }
+            });
+            
+            // Calculate percentages and sort
+            for (const category of Object.keys(tagStats)) {
+                const sorted = Object.entries(tagStats[category])
+                    .map(([tag, count]) => ({
+                        tag,
+                        count,
+                        percent: (count / total * 100).toFixed(1)
+                    }))
+                    .sort((a, b) => b.count - a.count);
+                
+                tagStats[category] = sorted;
+            }
+        }
+        
+        // Display tag statistics
+        function displayTagStats() {
+            const container = document.getElementById('tagCategories');
+            container.innerHTML = '';
+            
+            for (const [category, tags] of Object.entries(tagStats)) {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'tag-category';
+                
+                let tagsHtml = '';
+                if (tags.length === 0) {
+                    tagsHtml = '<div class="empty-category">Нет данных</div>';
+                } else {
+                    tags.forEach(({ tag, count, percent }) => {
+                        tagsHtml += `
+                            <div class="tag-item">
+                                <span class="tag-name">${tag}</span>
+                                <div class="tag-stats">
+                                    <div class="tag-bar">
+                                        <div class="tag-bar-fill" style="width: ${percent}%"></div>
+                                    </div>
+                                    <span class="tag-percent">${percent}%</span>
+                                    <span class="tag-count">${count}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                categoryDiv.innerHTML = `
+                    <h3>${category}</h3>
+                    ${tagsHtml}
+                `;
+                
+                container.appendChild(categoryDiv);
+            }
+        }
+        
+        // Get AI Insights
+        async function getAIInsights() {
+            const btn = document.getElementById('btnGetInsights');
+            const loader = document.getElementById('aiLoader');
+            const response = document.getElementById('aiResponse');
+            
+            btn.disabled = true;
+            loader.classList.add('visible');
+            response.classList.remove('visible');
+            
+            // Prepare data for AI
+            const prompt = buildPrompt();
+            
+            try {
+                // Получаем URL Apps Script из localStorage (тот же что для hypothesis tester)
+                const scriptUrl = localStorage.getItem('sheetsScriptUrl');
+                
+                if (!scriptUrl) {
+                    throw new Error('URL Apps Script не найден. Сначала подключись к Sheets в Hypothesis Tester.');
+                }
+                
+                const aiUrl = scriptUrl + '?action=ai_insights';
+                
+                const res = await fetch(aiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                const data = await res.json();
+                
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                document.getElementById('aiContent').textContent = data.insights || 'Нет ответа от AI';
+                response.classList.add('visible');
+                
+            } catch (error) {
+                // Fallback - показываем заглушку
+                document.getElementById('aiContent').textContent = generateFallbackInsights();
+                response.classList.add('visible');
+                console.error('AI Error:', error);
+            } finally {
+                btn.disabled = false;
+                loader.classList.remove('visible');
+            }
+        }
+        
+        // Build prompt for AI
+        function buildPrompt() {
+            const metric = metricNames[analysisData.metric] || analysisData.metric;
+            const passed = analysisData.passed === true ? 'подтверждена' : 'не подтверждена';
+            
+            let tagSummary = '';
+            for (const [category, tags] of Object.entries(tagStats)) {
+                if (tags.length > 0) {
+                    const topTags = tags.slice(0, 3).map(t => `${t.tag} (${t.percent}%)`).join(', ');
+                    tagSummary += `${category}: ${topTags}\n`;
+                }
+            }
+            
+            return `Проанализируй результаты теста маркетинговой гипотезы для рекламных креативов.
+
+Контекст:
+- Hypothesis ID: ${analysisData.hypothesisId || 'N/A'}
+- Метрика: ${metric}
+- Значение группы A: ${formatValue(analysisData.valueA, analysisData.metric)}
+- Значение группы B (бенчмарк): ${formatValue(analysisData.valueB, analysisData.metric)}
+- Разница: ${analysisData.diff ? analysisData.diff.toFixed(1) + '%' : 'N/A'}
+- Гипотеза: ${passed}
+- Количество креативов: ${analysisData.creatives.length}
+
+Распределение тегов в группе A:
+${tagSummary}
+
+Дай краткие инсайты:
+1. Какие теги/комбинации тегов могли повлиять на результат?
+2. Что стоит тестировать дальше?
+3. Какие рекомендации по оптимизации?
+
+Отвечай на русском, кратко и по делу.`;
+        }
+        
+        // Generate fallback insights (when AI is not available)
+        function generateFallbackInsights() {
+            const passed = analysisData.passed === true;
+            const metric = metricNames[analysisData.metric] || analysisData.metric;
+            
+            // Find top tags
+            let topTags = [];
+            for (const [category, tags] of Object.entries(tagStats)) {
+                if (tags.length > 0 && tags[0].percent > 30) {
+                    topTags.push(`${category}: ${tags[0].tag} (${tags[0].percent}%)`);
+                }
+            }
+            
+            let insights = `📊 Анализ ${analysisData.creatives.length} креативов\n\n`;
+            
+            if (passed) {
+                insights += `✅ Гипотеза подтверждена!\n\n`;
+                insights += `Доминирующие теги в успешной группе:\n`;
+            } else {
+                insights += `❌ Гипотеза не подтверждена\n\n`;
+                insights += `Теги в тестируемой группе:\n`;
+            }
+            
+            if (topTags.length > 0) {
+                insights += topTags.map(t => `• ${t}`).join('\n');
+            } else {
+                insights += `• Нет явно доминирующих тегов (распределение равномерное)`;
+            }
+            
+            insights += `\n\n💡 Рекомендации:\n`;
+            insights += `• Подключи Gemini API для детального анализа\n`;
+            insights += `• Проверь комбинации тегов с высоким % появления\n`;
+            insights += `• Сравни с другими гипотезами по этим тегам`;
+            
+            return insights;
+        }
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
