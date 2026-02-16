@@ -662,50 +662,37 @@
         }
         
         // Build prompt for AI
-        function buildPrompt() {
-            const customPrompt = document.getElementById('customPrompt').value.trim();
-            const metric = metricNames[analysisData.metric] || analysisData.metric;
-            const passed = analysisData.passed === true ? 'подтверждена' : 'не подтверждена';
-            
-            let tagSummary = '';
-            for (const [category, tags] of Object.entries(tagStats)) {
-                if (tags.length > 0) {
-                    const topTags = tags.slice(0, 5).map(t => `${t.tag} (${t.count} шт, ${t.percent}%)`).join(', ');
-                    tagSummary += `${category}: ${topTags}\n`;
-                }
-            }
-            
-            // Базовый контекст всегда включаем
-            let prompt = `Ты — аналитик маркетинговых креативов. Вот данные теста гипотезы:
-        
-            Контекст теста:
-            - Hypothesis ID: ${analysisData.hypothesisId || 'N/A'}
-            - Метрика: ${metric}
-            - Значение группы A: ${formatValue(analysisData.valueA, analysisData.metric)}
-            - Бенчмарк (группа B): ${formatValue(analysisData.valueB, analysisData.metric)}
-            - Разница: ${analysisData.diff ? analysisData.diff.toFixed(1) + '%' : 'N/A'}
-            - Гипотеза: ${passed}
-            - Количество креативов в выборке: ${analysisData.creatives.length}
-            
-            Распределение тегов в тестируемой группе:
-            ${tagSummary}
-            `;
-            
-                // Если есть кастомный промпт — используем его
-                if (customPrompt) {
-                    prompt += `\nВопрос пользователя:\n${customPrompt}\n\nОтветь на вопрос, используя данные выше. Отвечай на русском, кратко и по делу.`;
-                } else {
-                    // Стандартный запрос
-                    prompt += `\nПроанализируй данные и ответь:
-            1. Какие теги/комбинации тегов могли повлиять на результат?
-            2. Какие паттерны видишь в распределении тегов?
-            3. Что стоит тестировать дальше?
-            
-            Отвечай на русском, кратко и по делу.`;
-                }
-                
-                return prompt;
+function buildPrompt() {
+    const customPrompt = document.getElementById('customPrompt').value.trim();
+    const metric = metricNames[analysisData.metric] || analysisData.metric;
+    const passed = analysisData.passed === true ? 'da' : 'net';
+    
+    // Собираем только топ-3 тега на категорию
+    let tagSummary = '';
+    for (const [category, tags] of Object.entries(tagStats)) {
+        if (tags.length > 0) {
+            const topTag = tags[0];
+            tagSummary += category + ':' + topTag.tag + '(' + topTag.percent + '%);';
         }
+    }
+    
+    // Короткий prompt
+    let prompt = 'Analyze marketing creatives test. ';
+    prompt += 'Metric:' + metric + '. ';
+    prompt += 'ValueA:' + (analysisData.valueA ? analysisData.valueA.toFixed(2) : 'NA') + '. ';
+    prompt += 'Benchmark:' + (analysisData.valueB ? analysisData.valueB.toFixed(2) : 'NA') + '. ';
+    prompt += 'Hypothesis:' + passed + '. ';
+    prompt += 'Creatives:' + analysisData.creatives.length + '. ';
+    prompt += 'TopTags:' + tagSummary + ' ';
+    
+    if (customPrompt) {
+        prompt += 'UserQuestion:' + customPrompt.substring(0, 200) + ' ';
+    }
+    
+    prompt += 'Answer in Russian, briefly.';
+    
+    return prompt;
+}
         
         // Initialize on load
         document.addEventListener('DOMContentLoaded', init);
