@@ -187,6 +187,39 @@
             transform: none;
             box-shadow: none;
         }
+        .prompt-section {
+            margin-bottom: 20px;
+        }
+        
+        .prompt-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .prompt-section textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+        
+        .prompt-section textarea:focus {
+            outline: none;
+            border-color: #00b4d8;
+        }
+        
+        .prompt-hint {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
         
         .ai-response {
             background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
@@ -332,24 +365,30 @@
                 </div>
             </div>
             
-            <!-- AI Insights -->
-            <div class="card ai-section">
-                <h2>🤖 AI Инсайты</h2>
-                
-                <button class="btn-ai" id="btnGetInsights" onclick="getAIInsights()">
-                    ✨ Получить AI инсайты
-                </button>
-                
-                <div class="loader" id="aiLoader">
-                    <div class="loader-spinner"></div>
-                    <div>Анализирую данные...</div>
-                </div>
-                
-                <div class="ai-response" id="aiResponse">
-                    <h4>💡 Рекомендации</h4>
-                    <div class="content" id="aiContent"></div>
-                </div>
-            </div>
+           <!-- AI Insights -->
+<div class="card ai-section">
+    <h2>🤖 AI Инсайты</h2>
+    
+    <div class="prompt-section">
+        <label for="customPrompt">Твой вопрос к AI (опционально):</label>
+        <textarea id="customPrompt" placeholder="Например: Какие хуки лучше работают в комбинации с UGC форматом? Что стоит тестировать дальше?"></textarea>
+        <div class="prompt-hint">Оставь пустым для стандартного анализа тегов</div>
+    </div>
+    
+    <button class="btn-ai" id="btnGetInsights" onclick="getAIInsights()">
+        ✨ Получить AI инсайты
+    </button>
+    
+    <div class="loader" id="aiLoader">
+        <div class="loader-spinner"></div>
+        <div>Анализирую данные...</div>
+    </div>
+    
+    <div class="ai-response" id="aiResponse">
+        <h4>💡 Рекомендации</h4>
+        <div class="content" id="aiContent"></div>
+    </div>
+</div>
             
             <!-- Navigation -->
             <div style="margin-top: 20px;">
@@ -591,77 +630,51 @@
             }
         }
         
-        // Build prompt for AI
-        function buildPrompt() {
-            const metric = metricNames[analysisData.metric] || analysisData.metric;
-            const passed = analysisData.passed === true ? 'подтверждена' : 'не подтверждена';
-            
-            let tagSummary = '';
-            for (const [category, tags] of Object.entries(tagStats)) {
-                if (tags.length > 0) {
-                    const topTags = tags.slice(0, 3).map(t => `${t.tag} (${t.percent}%)`).join(', ');
-                    tagSummary += `${category}: ${topTags}\n`;
-                }
-            }
-            
-            return `Проанализируй результаты теста маркетинговой гипотезы для рекламных креативов.
+// Build prompt for AI
+function buildPrompt() {
+    const customPrompt = document.getElementById('customPrompt').value.trim();
+    const metric = metricNames[analysisData.metric] || analysisData.metric;
+    const passed = analysisData.passed === true ? 'подтверждена' : 'не подтверждена';
+    
+    let tagSummary = '';
+    for (const [category, tags] of Object.entries(tagStats)) {
+        if (tags.length > 0) {
+            const topTags = tags.slice(0, 5).map(t => `${t.tag} (${t.count} шт, ${t.percent}%)`).join(', ');
+            tagSummary += `${category}: ${topTags}\n`;
+        }
+    }
+    
+    // Базовый контекст всегда включаем
+    let prompt = `Ты — аналитик маркетинговых креативов. Вот данные теста гипотезы:
 
-Контекст:
-- Hypothesis ID: ${analysisData.hypothesisId || 'N/A'}
-- Метрика: ${metric}
-- Значение группы A: ${formatValue(analysisData.valueA, analysisData.metric)}
-- Значение группы B (бенчмарк): ${formatValue(analysisData.valueB, analysisData.metric)}
-- Разница: ${analysisData.diff ? analysisData.diff.toFixed(1) + '%' : 'N/A'}
-- Гипотеза: ${passed}
-- Количество креативов: ${analysisData.creatives.length}
-
-Распределение тегов в группе A:
-${tagSummary}
-
-Дай краткие инсайты:
-1. Какие теги/комбинации тегов могли повлиять на результат?
-2. Что стоит тестировать дальше?
-3. Какие рекомендации по оптимизации?
-
-Отвечай на русском, кратко и по делу.`;
+    Контекст теста:
+    - Hypothesis ID: ${analysisData.hypothesisId || 'N/A'}
+    - Метрика: ${metric}
+    - Значение группы A: ${formatValue(analysisData.valueA, analysisData.metric)}
+    - Бенчмарк (группа B): ${formatValue(analysisData.valueB, analysisData.metric)}
+    - Разница: ${analysisData.diff ? analysisData.diff.toFixed(1) + '%' : 'N/A'}
+    - Гипотеза: ${passed}
+    - Количество креативов в выборке: ${analysisData.creatives.length}
+    
+    Распределение тегов в тестируемой группе:
+    ${tagSummary}
+    `;
+    
+        // Если есть кастомный промпт — используем его
+        if (customPrompt) {
+            prompt += `\nВопрос пользователя:\n${customPrompt}\n\nОтветь на вопрос, используя данные выше. Отвечай на русском, кратко и по делу.`;
+        } else {
+            // Стандартный запрос
+            prompt += `\nПроанализируй данные и ответь:
+    1. Какие теги/комбинации тегов могли повлиять на результат?
+    2. Какие паттерны видишь в распределении тегов?
+    3. Что стоит тестировать дальше?
+    
+    Отвечай на русском, кратко и по делу.`;
         }
         
-        // Generate fallback insights (when AI is not available)
-        function generateFallbackInsights() {
-            const passed = analysisData.passed === true;
-            const metric = metricNames[analysisData.metric] || analysisData.metric;
-            
-            // Find top tags
-            let topTags = [];
-            for (const [category, tags] of Object.entries(tagStats)) {
-                if (tags.length > 0 && tags[0].percent > 30) {
-                    topTags.push(`${category}: ${tags[0].tag} (${tags[0].percent}%)`);
-                }
-            }
-            
-            let insights = `📊 Анализ ${analysisData.creatives.length} креативов\n\n`;
-            
-            if (passed) {
-                insights += `✅ Гипотеза подтверждена!\n\n`;
-                insights += `Доминирующие теги в успешной группе:\n`;
-            } else {
-                insights += `❌ Гипотеза не подтверждена\n\n`;
-                insights += `Теги в тестируемой группе:\n`;
-            }
-            
-            if (topTags.length > 0) {
-                insights += topTags.map(t => `• ${t}`).join('\n');
-            } else {
-                insights += `• Нет явно доминирующих тегов (распределение равномерное)`;
-            }
-            
-            insights += `\n\n💡 Рекомендации:\n`;
-            insights += `• Подключи Gemini API для детального анализа\n`;
-            insights += `• Проверь комбинации тегов с высоким % появления\n`;
-            insights += `• Сравни с другими гипотезами по этим тегам`;
-            
-            return insights;
-        }
+        return prompt;
+}
         
         // Initialize on load
         document.addEventListener('DOMContentLoaded', init);
