@@ -598,17 +598,38 @@
                     throw new Error('URL Apps Script не найден. Сначала подключись к Sheets в Hypothesis Tester.');
                 }
                 
-                // GET запрос с prompt в параметре
-                const aiUrl = scriptUrl + '?action=ai_insights&prompt=' + encodeURIComponent(prompt);
+                // Используем JSONP через script tag
+                const callbackName = 'aiCallback_' + Date.now();
+                const aiUrl = scriptUrl + '?action=ai_insights&callback=' + callbackName + '&prompt=' + encodeURIComponent(prompt);
                 
-                const res = await fetch(aiUrl);
-                const data = await res.json();
+                // Создаём promise для callback
+                const result = await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Timeout - AI не ответил за 30 секунд'));
+                    }, 30000);
+                    
+                    window[callbackName] = function(data) {
+                        clearTimeout(timeout);
+                        delete window[callbackName];
+                        document.body.removeChild(script);
+                        resolve(data);
+                    };
+                    
+                    const script = document.createElement('script');
+                    script.src = aiUrl;
+                    script.onerror = () => {
+                        clearTimeout(timeout);
+                        delete window[callbackName];
+                        reject(new Error('Ошибка загрузки'));
+                    };
+                    document.body.appendChild(script);
+                });
                 
-                if (data.error) {
-                    throw new Error(data.error);
+                if (result.error) {
+                    throw new Error(result.error);
                 }
                 
-                document.getElementById('aiContent').textContent = data.insights || 'Нет ответа от AI';
+                document.getElementById('aiContent').textContent = result.insights || 'Нет ответа от AI';
                 response.classList.add('visible');
                 
             } catch (error) {
@@ -619,7 +640,7 @@
                 btn.disabled = false;
                 loader.classList.remove('visible');
             }
-        }
+}
         
         // Локальный анализ (fallback)
         function generateLocalInsights() {
