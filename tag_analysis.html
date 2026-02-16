@@ -579,7 +579,7 @@
             }
         }
         
-        // Get AI Insights
+                // Get AI Insights
         async function getAIInsights() {
             const btn = document.getElementById('btnGetInsights');
             const loader = document.getElementById('aiLoader');
@@ -589,92 +589,128 @@
             loader.classList.add('visible');
             response.classList.remove('visible');
             
-            // Prepare data for AI
-            const prompt = buildPrompt();
-            
-            try {
-                // Получаем URL Apps Script из localStorage (тот же что для hypothesis tester)
-                const scriptUrl = localStorage.getItem('sheetsScriptUrl');
-                
-                if (!scriptUrl) {
-                    throw new Error('URL Apps Script не найден. Сначала подключись к Sheets в Hypothesis Tester.');
-                }
-                
-                const aiUrl = scriptUrl + '?action=ai_insights';
-                
-                const res = await fetch(aiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ prompt: prompt })
-                });
-                
-                const data = await res.json();
-                
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                
-                document.getElementById('aiContent').textContent = data.insights || 'Нет ответа от AI';
+            // Пока используем fallback (локальный анализ)
+            // TODO: подключить Gemini когда решим CORS
+            setTimeout(() => {
+                const insights = generateLocalInsights();
+                document.getElementById('aiContent').textContent = insights;
                 response.classList.add('visible');
-                
-            } catch (error) {
-                // Fallback - показываем заглушку
-                document.getElementById('aiContent').textContent = generateFallbackInsights();
-                response.classList.add('visible');
-                console.error('AI Error:', error);
-            } finally {
                 btn.disabled = false;
                 loader.classList.remove('visible');
+            }, 1000);
+        }
+        
+        // Локальный анализ (без API)
+        function generateLocalInsights() {
+            const customPrompt = document.getElementById('customPrompt').value.trim();
+            const passed = analysisData.passed === true;
+            const metric = metricNames[analysisData.metric] || analysisData.metric;
+            
+            // Собираем топ теги
+            let topTags = [];
+            let allTags = [];
+            for (const [category, tags] of Object.entries(tagStats)) {
+                if (tags.length > 0) {
+                    topTags.push({ category, tag: tags[0].tag, percent: tags[0].percent, count: tags[0].count });
+                    tags.forEach(t => allTags.push({ category, ...t }));
+                }
             }
-        }
-        
-// Build prompt for AI
-function buildPrompt() {
-    const customPrompt = document.getElementById('customPrompt').value.trim();
-    const metric = metricNames[analysisData.metric] || analysisData.metric;
-    const passed = analysisData.passed === true ? 'подтверждена' : 'не подтверждена';
-    
-    let tagSummary = '';
-    for (const [category, tags] of Object.entries(tagStats)) {
-        if (tags.length > 0) {
-            const topTags = tags.slice(0, 5).map(t => `${t.tag} (${t.count} шт, ${t.percent}%)`).join(', ');
-            tagSummary += `${category}: ${topTags}\n`;
-        }
-    }
-    
-    // Базовый контекст всегда включаем
-    let prompt = `Ты — аналитик маркетинговых креативов. Вот данные теста гипотезы:
-
-    Контекст теста:
-    - Hypothesis ID: ${analysisData.hypothesisId || 'N/A'}
-    - Метрика: ${metric}
-    - Значение группы A: ${formatValue(analysisData.valueA, analysisData.metric)}
-    - Бенчмарк (группа B): ${formatValue(analysisData.valueB, analysisData.metric)}
-    - Разница: ${analysisData.diff ? analysisData.diff.toFixed(1) + '%' : 'N/A'}
-    - Гипотеза: ${passed}
-    - Количество креативов в выборке: ${analysisData.creatives.length}
-    
-    Распределение тегов в тестируемой группе:
-    ${tagSummary}
-    `;
-    
-        // Если есть кастомный промпт — используем его
-        if (customPrompt) {
-            prompt += `\nВопрос пользователя:\n${customPrompt}\n\nОтветь на вопрос, используя данные выше. Отвечай на русском, кратко и по делу.`;
-        } else {
-            // Стандартный запрос
-            prompt += `\nПроанализируй данные и ответь:
-    1. Какие теги/комбинации тегов могли повлиять на результат?
-    2. Какие паттерны видишь в распределении тегов?
-    3. Что стоит тестировать дальше?
-    
-    Отвечай на русском, кратко и по делу.`;
-        }
-        
-        return prompt;
+            
+            // Сортируем по проценту
+            topTags.sort((a, b) => parseFloat(b.percent) - parseFloat(a.percent));
+            
+            let insights = `📊 АНАЛИЗ ${analysisData.creatives.length} КРЕАТИВОВ\n`;
+            insights += `${'═'.repeat(40)}\n\n`;
+            
+            // Результат теста
+            if (passed) {
+                insights += `✅ Гипотеза ПОДТВЕРЖДЕНА\n`;
+                insights += `   ${metric}: ${formatValue(analysisData.valueA, analysisData.metric)} vs ${formatValue(analysisData.valueB, analysisData.metric)} (бенчмарк)\n\n`;
+            } else {
+                insights += `❌ Гипотеза НЕ подтверждена\n`;
+                insights += `   ${metric}: ${formatValue(analysisData.valueA, analysisData.metric)} vs ${formatValue(analysisData.valueB, analysisData.metric)} (бенчмарк)\n\n`;
+            }
+            
+            // Доминирующие теги
+            insights += `🏷️ ДОМИНИРУЮЩИЕ ТЕГИ:\n`;
+            const dominantTags = topTags.filter(t => parseFloat(t.percent) >= 30);
+            if (dominantTags.length > 0) {
+                dominantTags.forEach(t => {
+                    insights += `   • ${t.category}: ${t.tag} — ${t.percent}% (${t.count} креативов)\n`;
+                });
+            } else {
+                insights += `   • Нет явно доминирующих тегов (все < 30%)\n`;
+            }
+            
+            insights += `\n`;
+            
+            // Если есть кастомный вопрос
+            if (customPrompt) {
+                insights += `❓ ТВОЙ ВОПРОС:\n`;
+                insights += `   "${customPrompt}"\n\n`;
+                insights += `💡 Для ответа на этот вопрос подключи Gemini API.\n`;
+                insights += `   Пока могу показать только статистику тегов выше.\n\n`;
+            }
+            
+            // Рекомендации
+            insights += `💡 РЕКОМЕНДАЦИИ:\n`;
+            if (passed && dominantTags.length > 0) {
+                insights += `   • Масштабируй креативы с: ${dominantTags.map(t => t.tag).join(', ')}\n`;
+                insights += `   • Тестируй эти теги в других GEO\n`;
+            } else {
+                insights += `   • Проанализируй креативы с низким CPA отдельно\n`;
+                insights += `   • Попробуй другие комбинации тегов\n`;
+            }
+            insights += `   • Подключи Gemini API для глубокого анализа\n`;
+            
+            return insights;
 }
+        
+        // Build prompt for AI
+        function buildPrompt() {
+            const customPrompt = document.getElementById('customPrompt').value.trim();
+            const metric = metricNames[analysisData.metric] || analysisData.metric;
+            const passed = analysisData.passed === true ? 'подтверждена' : 'не подтверждена';
+            
+            let tagSummary = '';
+            for (const [category, tags] of Object.entries(tagStats)) {
+                if (tags.length > 0) {
+                    const topTags = tags.slice(0, 5).map(t => `${t.tag} (${t.count} шт, ${t.percent}%)`).join(', ');
+                    tagSummary += `${category}: ${topTags}\n`;
+                }
+            }
+            
+            // Базовый контекст всегда включаем
+            let prompt = `Ты — аналитик маркетинговых креативов. Вот данные теста гипотезы:
+        
+            Контекст теста:
+            - Hypothesis ID: ${analysisData.hypothesisId || 'N/A'}
+            - Метрика: ${metric}
+            - Значение группы A: ${formatValue(analysisData.valueA, analysisData.metric)}
+            - Бенчмарк (группа B): ${formatValue(analysisData.valueB, analysisData.metric)}
+            - Разница: ${analysisData.diff ? analysisData.diff.toFixed(1) + '%' : 'N/A'}
+            - Гипотеза: ${passed}
+            - Количество креативов в выборке: ${analysisData.creatives.length}
+            
+            Распределение тегов в тестируемой группе:
+            ${tagSummary}
+            `;
+            
+                // Если есть кастомный промпт — используем его
+                if (customPrompt) {
+                    prompt += `\nВопрос пользователя:\n${customPrompt}\n\nОтветь на вопрос, используя данные выше. Отвечай на русском, кратко и по делу.`;
+                } else {
+                    // Стандартный запрос
+                    prompt += `\nПроанализируй данные и ответь:
+            1. Какие теги/комбинации тегов могли повлиять на результат?
+            2. Какие паттерны видишь в распределении тегов?
+            3. Что стоит тестировать дальше?
+            
+            Отвечай на русском, кратко и по делу.`;
+                }
+                
+                return prompt;
+        }
         
         // Initialize on load
         document.addEventListener('DOMContentLoaded', init);
