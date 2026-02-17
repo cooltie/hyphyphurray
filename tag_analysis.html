@@ -670,27 +670,35 @@ function getAIInsights() {
     console.log("Тег <script> добавлен в DOM. Ожидание ответа...");
 }
         
-        
-        // Build prompt for AI
+       // Build prompt for AI
 function buildPrompt() {
+    console.log("Начинаю сборку промпта..."); // Тут еще нет переменной prompt, поэтому логируем просто текст
+
     const customPrompt = document.getElementById('customPrompt').value.trim();
-    console.log("Промпт сформирован, длина:", prompt.length);
     
-    // Берем все креативы, которые попали в выборку (уже отфильтрованы в index.html)
+    // 1. Проверка наличия данных
+    if (!analysisData || !analysisData.creatives || analysisData.creatives.length === 0) {
+        console.error("Ошибка: analysisData.creatives пуст!");
+        return "";
+    }
+
     const creatives = analysisData.creatives;
     
-    // Превращаем их в CSV-строку, чтобы передать ВСЕ колонки
-    // Берем заголовки из первого объекта
+    // 2. Формируем CSV
     const headers = Object.keys(creatives[0]);
     const csvRows = creatives.map(c => headers.map(h => c[h]).join(";"));
     const csvContent = headers.join(";") + "\n" + csvRows.join("\n");
 
+    // 3. Создаем переменную prompt (сначала объявляем!)
     let prompt = `Проанализируй данные рекламных креативов (формат CSV, разделитель ;):\n\n`;
-    prompt += csvContent.substring(0, 15000); // Ограничиваем длину для стабильности
+    prompt += csvContent.substring(0, 15000); // Ограничиваем длину
     
     prompt += `\n\nМетрика теста: ${analysisData.metric}`;
     prompt += `\nВопрос пользователя: ${customPrompt || "Сделай глубокий анализ: какие теги и комбинации дают лучший результат?"}`;
     prompt += `\nОтветь на русском языке, структурировано.`;
+    
+    // 4. ТЕПЕРЬ можно логировать, так как prompt уже существует
+    console.log("Промпт успешно сформирован. Итоговая длина:", prompt.length);
     
     return prompt;
 }
