@@ -579,70 +579,96 @@
             }
         }
         
-    async function getAIInsights() {
+function getAIInsights() {
+    console.log("--- СТАРТ: getAIInsights ---");
 
-        console.log("Кнопка нажата, функция getAIInsights запущена");
-        
-        const btn = document.getElementById('btnGetInsights');
-        const loader = document.getElementById('aiLoader');
-        const resultDiv = document.getElementById('aiResponse');
-        console.log("Элемент aiResponse:", resultDiv);
-        const contentDiv = document.getElementById('aiContent');
+    const btn = document.getElementById('btnGetInsights');
+    const loader = document.getElementById('aiLoader');
+    const responseDiv = document.getElementById('aiResponse');
+    const contentDiv = document.getElementById('aiContent');
 
-          // 1. Проверка данных
-        if (!resultDiv) {
-        console.error("ОШИБКА: Элемент 'aiResponse' не найден в HTML. Проверьте ID в тегах!");
-        alert("Критическая ошибка: некуда выводить ответ AI. Проверьте консоль (F12)");
-        return; 
-        }
-      
-        if (!analysisData || !analysisData.creatives) {
-            alert("❌ Данные не загружены. Вернитесь на главную и запустите тест.");
-            return;
-        }
-    
-        const scriptUrl = localStorage.getItem('sheetsScriptUrl');
-        if (!scriptUrl) {
-            alert("❌ URL скрипта не найден. Сначала подключитесь на главной странице.");
-            return;
-        }
-    
-        const prompt = buildPrompt();
-    
-        // 2. Визуальная индикация
-        btn.disabled = true;
-        loader.classList.add('visible');
-        responseDiv.classList.remove('visible');
-    
-        // 3. Отправка запроса через JSONP (аналогично логике App Script)
-        const callbackName = 'ai_callback_' + Math.round(Math.random() * 1000000);
-        
-        window[callbackName] = function(response) {
-            btn.disabled = false;
-            loader.classList.remove('visible');
-            
-            if (response.error) {
-                alert("Ошибка AI: " + response.error);
-            } else if (response.insights) {
-                responseDiv.classList.add('visible');
-                // Форматируем текст (заменяем переносы на <br> и обрабатываем markdown-звездочки)
-                const formattedText = response.insights
-                    .replace(/\n/g, '<br>')
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                contentDiv.innerHTML = formattedText;
-            }
-            
-            // Очистка
-            delete window[callbackName];
-            document.getElementById(callbackName)?.remove();
-        };
-    
-        const finalUrl = `${scriptUrl}?action=ai_insights&prompt=${encodeURIComponent(prompt)}&callback=${callbackName}`;
-        const scriptTag = document.createElement('script');
-        scriptTag.id = callbackName;
-        scriptTag.src = finalUrl;
-        document.body.appendChild(scriptTag);
+    // 1. Проверка элементов
+    console.log("Проверка DOM-элементов...");
+    if (!responseDiv || !contentDiv || !loader) {
+        console.error("ОШИБКА: Один из элементов (aiResponse, aiContent, aiLoader) не найден!");
+        return;
     }
+
+    // 2. Проверка данных
+    console.log("Проверка наличия данных для анализа...");
+    if (!analysisData || !analysisData.creatives) {
+        console.warn("ПРЕДУПРЕЖДЕНИЕ: analysisData пуст");
+        alert("❌ Данные не загружены. Вернитесь на главную и запустите тест.");
+        return;
+    }
+
+    const scriptUrl = localStorage.getItem('sheetsScriptUrl');
+    if (!scriptUrl) {
+        console.error("ОШИБКА: scriptUrl отсутствует в localStorage");
+        alert("❌ URL скрипта не найден.");
+        return;
+    }
+
+    console.log("Формирование промпта...");
+    const prompt = buildPrompt();
+    console.log("Длина промпта:", prompt.length, "символов");
+
+    // 3. Визуальная индикация
+    console.log("Включение индикатора загрузки...");
+    btn.disabled = true;
+    loader.classList.add('visible');
+    responseDiv.classList.remove('visible');
+
+    // 4. Подготовка JSONP
+    const callbackName = 'ai_callback_' + Math.round(Math.random() * 1000000);
+    console.log("Создан callback:", callbackName);
+    
+    window[callbackName] = function(response) {
+        console.log("--- ОТВЕТ ПОЛУЧЕН ОТ СЕРВЕРА ---");
+        console.log("Содержимое ответа:", response);
+
+        btn.disabled = false;
+        loader.classList.remove('visible');
+        
+        if (response.error) {
+            console.error("Сервер вернул ошибку AI:", response.error);
+            alert("Ошибка AI: " + response.error);
+        } else if (response.insights) {
+            console.log("Успех: Инсайты получены. Отрисовка...");
+            responseDiv.classList.add('visible');
+            
+            const formattedText = response.insights
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            contentDiv.innerHTML = formattedText;
+        }
+        
+        console.log("Очистка callback-скрипта...");
+        delete window[callbackName];
+        const scriptTag = document.getElementById(callbackName);
+        if (scriptTag) scriptTag.remove();
+    };
+
+    // 5. Отправка
+    const finalUrl = `${scriptUrl}?action=ai_insights&prompt=${encodeURIComponent(prompt)}&callback=${callbackName}`;
+    console.log("Отправка JSONP запроса по URL:", finalUrl);
+
+    const scriptTag = document.createElement('script');
+    scriptTag.id = callbackName;
+    scriptTag.src = finalUrl;
+    
+    // Добавим отслеживание ошибки самого тега script
+    scriptTag.onerror = function() {
+        console.error("ОШИБКА: Не удалось загрузить скрипт по URL. Возможно, проблема с сетью или URL.");
+        btn.disabled = false;
+        loader.classList.remove('visible');
+        alert("Критическая ошибка сети при запросе к скрипту.");
+    };
+
+    document.body.appendChild(scriptTag);
+    console.log("Тег <script> добавлен в DOM. Ожидание ответа...");
+}
         
         
         // Build prompt for AI
