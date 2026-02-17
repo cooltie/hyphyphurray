@@ -618,8 +618,8 @@ async function getAIInsights() {
         });
 
         const result = await response.json();
-        console.log("Debug Log с сервера:", data.debugLog);
-
+        console.log("Debug Log с сервера:", result.debugLog); 
+        
         if (result.status === 'success') {
             console.log("✅ Ответ от AI получен");
             contentDiv.textContent = result.text;
@@ -628,6 +628,7 @@ async function getAIInsights() {
             console.error("❌ Ошибка сервера:", result.message);
             throw new Error(result.message);
         }
+         console.log("Debug Log с сервера:", data.debugLog);
 
     } catch (error) {
         console.error("💥 Ошибка:", error);
