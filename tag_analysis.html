@@ -603,14 +603,14 @@ async function getAIInsights() {
         if (!recipeRaw) throw new Error("Сначала запустите тест на главной странице!");
         const recipe = JSON.parse(recipeRaw);
 
-        // 2. Формируем посылку. Мы не шлем CSV, мы шлем "инструкцию" и "вопрос"
+        // 2. Формируем посылку. Мы не шлем CSV, мы шлем "" и "вопрос"
         const payload = {
             action: 'ai_analysis',
             recipe: recipe,
             userQuestion: userPromptText // Передаем текст из интерфейса
         };
 
-        console.log("🚀 Отправка данных на Google Script...");
+        console.log("🚀 Отправка данных в Google Script...");
         
         const response = await fetch(scriptUrl, {
             method: 'POST',
