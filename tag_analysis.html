@@ -628,7 +628,7 @@ async function getAIInsights() {
             console.error("❌ Ошибка сервера:", result.message);
             throw new Error(result.message);
         }
-         console.log("Debug Log с сервера:", data.debugLog);
+         console.log("Debug Log с сервера:", result.debugLog);
 
     } catch (error) {
         console.error("💥 Ошибка:", error);
