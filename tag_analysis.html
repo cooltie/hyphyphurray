@@ -579,50 +579,60 @@
             }
         }
         
-async function getAIInsights() {
-    // 1. Ищем или создаем блок для результата
-    let resultDiv = document.getElementById('aiInsightsResult');
-    if (!resultDiv) {
-        resultDiv = document.createElement('div');
-        resultDiv.id = 'aiInsightsResult';
-        // Ищем любой контейнер .card или просто добавляем в конец body
-        const container = document.querySelector('.card') || document.body;
-        container.appendChild(resultDiv);
-    }
-
-    // 2. Ищем кнопку (безопасно)
-    const btn = document.getElementById('btnGetInsights') || document.querySelector('.btn-ai');
+    async function getAIInsights() {
+        const btn = document.getElementById('btnGetInsights');
+        const loader = document.getElementById('aiLoader');
+        const responseDiv = document.getElementById('aiResponse');
+        const contentDiv = document.getElementById('aiContent');
     
-    // 3. ПРОВЕРКА: Если данных для анализа нет
-    if (!analysisData || !analysisData.creatives) {
-        resultDiv.innerHTML = '<div class="error">❌ Данные не загружены. Вернитесь на главную и нажмите Run Test.</div>';
-        return;
-    }
-
-    const prompt = buildPrompt();
-
-    // 4. Проверяем кнопку перед тем как выключать её
-    if (btn) btn.disabled = true;
+        // 1. Проверка данных
+        if (!analysisData || !analysisData.creatives) {
+            alert("❌ Данные не загружены. Вернитесь на главную и запустите тест.");
+            return;
+        }
     
-    resultDiv.innerHTML = '<div class="loading">🧠 Анализирую данные... это может занять до 30 секунд.</div>';
-
-    // Вызов скрипта
-    google.script.run
-        .withSuccessHandler(function(response) {
-            if (btn) btn.disabled = false;
+        const scriptUrl = localStorage.getItem('sheetsScriptUrl');
+        if (!scriptUrl) {
+            alert("❌ URL скрипта не найден. Сначала подключитесь на главной странице.");
+            return;
+        }
+    
+        const prompt = buildPrompt();
+    
+        // 2. Визуальная индикация
+        btn.disabled = true;
+        loader.classList.add('visible');
+        responseDiv.classList.remove('visible');
+    
+        // 3. Отправка запроса через JSONP (аналогично логике App Script)
+        const callbackName = 'ai_callback_' + Math.round(Math.random() * 1000000);
+        
+        window[callbackName] = function(response) {
+            btn.disabled = false;
+            loader.classList.remove('visible');
+            
             if (response.error) {
-                resultDiv.innerHTML = '<div class="error">❌ Ошибка: ' + response.error + '</div>';
-            } else {
-                const formattedText = response.insights.replace(/\n/g, '<br>');
-                resultDiv.innerHTML = '<div class="insight-text">' + formattedText + '</div>';
+                alert("Ошибка AI: " + response.error);
+            } else if (response.insights) {
+                responseDiv.classList.add('visible');
+                // Форматируем текст (заменяем переносы на <br> и обрабатываем markdown-звездочки)
+                const formattedText = response.insights
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                contentDiv.innerHTML = formattedText;
             }
-        })
-        .withFailureHandler(function(err) {
-            if (btn) btn.disabled = false;
-            resultDiv.innerHTML = '<div class="error">❌ Критическая ошибка сервера: ' + err.message + '</div>';
-        })
-        .processAIAnalysis(prompt); 
-}
+            
+            // Очистка
+            delete window[callbackName];
+            document.getElementById(callbackName)?.remove();
+        };
+    
+        const finalUrl = `${scriptUrl}?action=ai_insights&prompt=${encodeURIComponent(prompt)}&callback=${callbackName}`;
+        const scriptTag = document.createElement('script');
+        scriptTag.id = callbackName;
+        scriptTag.src = finalUrl;
+        document.body.appendChild(scriptTag);
+    }
         
         
         // Build prompt for AI
