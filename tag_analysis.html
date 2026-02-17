@@ -594,12 +594,19 @@ function getAIInsights() {
         return;
     }
 
-    // Собираем параметры
-    const hypId = document.getElementById('hypothesisId').value;
-    const customPrompt = document.getElementById('customPrompt').value.trim();
-    const tags = JSON.stringify(analysisData.filters || {});
+// Безопасное получение ID гипотезы (если элемент есть и выбран)
+    const hypElem = document.getElementById('hypothesisId');
+    const hypId = hypElem ? hypElem.value : "";
+    const promptElem = document.getElementById('customPrompt');
+    const customPrompt = promptElem ? promptElem.value.trim() : "";
+    
+   const tags = JSON.stringify(analysisData.filters || {});
 
-    console.log("Отправляем инструкции фильтрации:", { hypId, tags, metric: analysisData.metric });
+    console.log("Отправляем инструкции. Выбрано:", { 
+        hypId: hypId || "все", 
+        tags: tags, 
+        metric: analysisData.metric 
+    });
 
     // Индикация загрузки
     btn.disabled = true;
