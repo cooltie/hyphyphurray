@@ -580,12 +580,22 @@
         }
         
     async function getAIInsights() {
+
+        console.log("Кнопка нажата, функция getAIInsights запущена");
+        
         const btn = document.getElementById('btnGetInsights');
         const loader = document.getElementById('aiLoader');
         const responseDiv = document.getElementById('aiResponse');
+        console.log("Элемент aiResponse:", resultDiv);
         const contentDiv = document.getElementById('aiContent');
-    
-        // 1. Проверка данных
+
+          // 1. Проверка данных
+        if (!resultDiv) {
+        console.error("ОШИБКА: Элемент 'aiResponse' не найден в HTML. Проверьте ID в тегах!");
+        alert("Критическая ошибка: некуда выводить ответ AI. Проверьте консоль (F12)");
+        return; 
+        }
+      
         if (!analysisData || !analysisData.creatives) {
             alert("❌ Данные не загружены. Вернитесь на главную и запустите тест.");
             return;
@@ -638,6 +648,7 @@
         // Build prompt for AI
 function buildPrompt() {
     const customPrompt = document.getElementById('customPrompt').value.trim();
+    console.log("Промпт сформирован, длина:", prompt.length);
     
     // Берем все креативы, которые попали в выборку (уже отфильтрованы в index.html)
     const creatives = analysisData.creatives;
