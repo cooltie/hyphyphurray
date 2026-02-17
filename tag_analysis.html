@@ -664,32 +664,22 @@
         // Build prompt for AI
 function buildPrompt() {
     const customPrompt = document.getElementById('customPrompt').value.trim();
-    const metric = metricNames[analysisData.metric] || analysisData.metric;
-    const passed = analysisData.passed === true ? 'da' : 'net';
     
-    // Собираем только топ-3 тега на категорию
-    let tagSummary = '';
-    for (const [category, tags] of Object.entries(tagStats)) {
-        if (tags.length > 0) {
-            const topTag = tags[0];
-            tagSummary += category + ':' + topTag.tag + '(' + topTag.percent + 'pct);';
-        }
-    }
+    // Берем все креативы, которые попали в выборку (уже отфильтрованы в index.html)
+    const creatives = analysisData.creatives;
     
-    // Короткий prompt
-    let prompt = 'Analyze marketing creatives test. ';
-    prompt += 'Metric:' + metric + '. ';
-    prompt += 'ValueA:' + (analysisData.valueA ? analysisData.valueA.toFixed(2) : 'NA') + '. ';
-    prompt += 'Benchmark:' + (analysisData.valueB ? analysisData.valueB.toFixed(2) : 'NA') + '. ';
-    prompt += 'Hypothesis:' + passed + '. ';
-    prompt += 'Creatives:' + analysisData.creatives.length + '. ';
-    prompt += 'TopTags:' + tagSummary + ' ';
+    // Превращаем их в CSV-строку, чтобы передать ВСЕ колонки
+    // Берем заголовки из первого объекта
+    const headers = Object.keys(creatives[0]);
+    const csvRows = creatives.map(c => headers.map(h => c[h]).join(";"));
+    const csvContent = headers.join(";") + "\n" + csvRows.join("\n");
+
+    let prompt = `Проанализируй данные рекламных креативов (формат CSV, разделитель ;):\n\n`;
+    prompt += csvContent.substring(0, 15000); // Ограничиваем длину для стабильности
     
-    if (customPrompt) {
-        prompt += 'UserQuestion:' + customPrompt.substring(0, 200) + ' ';
-    }
-    
-    prompt += 'Answer in Russian, briefly.';
+    prompt += `\n\nМетрика теста: ${analysisData.metric}`;
+    prompt += `\nВопрос пользователя: ${customPrompt || "Сделай глубокий анализ: какие теги и комбинации дают лучший результат?"}`;
+    prompt += `\nОтветь на русском языке, структурировано.`;
     
     return prompt;
 }
