@@ -618,6 +618,7 @@ async function getAIInsights() {
         });
 
         const result = await response.json();
+        console.log("Debug Log с сервера:", data.debugLog);
 
         if (result.status === 'success') {
             console.log("✅ Ответ от AI получен");
