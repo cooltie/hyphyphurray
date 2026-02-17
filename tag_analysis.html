@@ -580,94 +580,82 @@
         }
         
 function getAIInsights() {
-    console.log("--- СТАРТ: getAIInsights ---");
+    console.log("%c--- СТАРТ: getAIInsights (Серверная фильтрация) ---", "color: blue; font-weight: bold;");
 
     const btn = document.getElementById('btnGetInsights');
     const loader = document.getElementById('aiLoader');
     const responseDiv = document.getElementById('aiResponse');
     const contentDiv = document.getElementById('aiContent');
-
-    // 1. Проверка элементов
-    console.log("Проверка DOM-элементов...");
-    if (!responseDiv || !contentDiv || !loader) {
-        console.error("ОШИБКА: Один из элементов (aiResponse, aiContent, aiLoader) не найден!");
-        return;
-    }
-
-    // 2. Проверка данных
-    console.log("Проверка наличия данных для анализа...");
-    if (!analysisData || !analysisData.creatives) {
-        console.warn("ПРЕДУПРЕЖДЕНИЕ: analysisData пуст");
-        alert("❌ Данные не загружены. Вернитесь на главную и запустите тест.");
-        return;
-    }
-
     const scriptUrl = localStorage.getItem('sheetsScriptUrl');
+
     if (!scriptUrl) {
-        console.error("ОШИБКА: scriptUrl отсутствует в localStorage");
-        alert("❌ URL скрипта не найден.");
+        console.error("Ошибка: sheetsScriptUrl не найден в localStorage");
+        alert("Ошибка: Ссылка на скрипт отсутствует.");
         return;
     }
 
-    console.log("Формирование промпта...");
-    const prompt = buildPrompt();
-    console.log("Длина промпта:", prompt.length, "символов");
+    // Собираем параметры
+    const hypId = document.getElementById('hypothesisId').value;
+    const customPrompt = document.getElementById('customPrompt').value.trim();
+    const tags = JSON.stringify(analysisData.filters || {});
 
-    // 3. Визуальная индикация
-    console.log("Включение индикатора загрузки...");
+    console.log("Отправляем инструкции фильтрации:", { hypId, tags, metric: analysisData.metric });
+
+    // Индикация загрузки
     btn.disabled = true;
-    loader.classList.add('visible');
-    responseDiv.classList.remove('visible');
+    if (loader) loader.classList.add('visible');
+    if (responseDiv) responseDiv.classList.remove('visible');
 
-    // 4. Подготовка JSONP
-    const callbackName = 'ai_callback_' + Math.round(Math.random() * 1000000);
-    console.log("Создан callback:", callbackName);
-    
+    const callbackName = 'ai_cb_' + Date.now();
+    console.log("Создан callback для ответа:", callbackName);
+
     window[callbackName] = function(response) {
-        console.log("--- ОТВЕТ ПОЛУЧЕН ОТ СЕРВЕРА ---");
-        console.log("Содержимое ответа:", response);
+        console.log("%c--- ОТВЕТ ОТ СЕРВЕРА ПОЛУЧЕН ---", "color: green; font-weight: bold;");
+        console.log("Результат:", response);
 
         btn.disabled = false;
-        loader.classList.remove('visible');
-        
+        if (loader) loader.classList.remove('visible');
+
         if (response.error) {
-            console.error("Сервер вернул ошибку AI:", response.error);
-            alert("Ошибка AI: " + response.error);
+            console.error("Сервер вернул ошибку:", response.error);
+            alert("Ошибка: " + response.error);
         } else if (response.insights) {
-            console.log("Успех: Инсайты получены. Отрисовка...");
-            responseDiv.classList.add('visible');
+            console.log("Отрисовка инсайтов в интерфейс...");
+            if (responseDiv) responseDiv.classList.add('visible');
             
             const formattedText = response.insights
                 .replace(/\n/g, '<br>')
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             
-            contentDiv.innerHTML = formattedText;
+            if (contentDiv) contentDiv.innerHTML = formattedText;
         }
-        
-        console.log("Очистка callback-скрипта...");
+
+        // Cleanup
         delete window[callbackName];
-        const scriptTag = document.getElementById(callbackName);
-        if (scriptTag) scriptTag.remove();
+        const scriptElement = document.getElementById(callbackName);
+        if (scriptElement) scriptElement.remove();
     };
 
-    // 5. Отправка
-    const finalUrl = `${scriptUrl}?action=ai_insights&prompt=${encodeURIComponent(prompt)}&callback=${callbackName}`;
-    console.log("Отправка JSONP запроса по URL:", finalUrl);
+    const finalUrl = `${scriptUrl}?action=ai_insights_internal` + 
+                     `&hypId=${encodeURIComponent(hypId)}` + 
+                     `&metric=${encodeURIComponent(analysisData.metric)}` + 
+                     `&tags=${encodeURIComponent(tags)}` + 
+                     `&userQuestion=${encodeURIComponent(customPrompt)}` + 
+                     `&callback=${callbackName}`;
 
-    const scriptTag = document.createElement('script');
-    scriptTag.id = callbackName;
-    scriptTag.src = finalUrl;
+    console.log("Финальный URL запроса (короткий):", finalUrl);
+
+    const script = document.createElement('script');
+    script.id = callbackName;
+    script.src = finalUrl;
     
-    // Добавим отслеживание ошибки самого тега script
-    scriptTag.onerror = function() {
-        console.error("ОШИБКА: Не удалось загрузить скрипт по URL. Возможно, проблема с сетью или URL.");
+    script.onerror = function() {
+        console.error("Ошибка сети или URL при попытке загрузить JSONP скрипт.");
         btn.disabled = false;
-        loader.classList.remove('visible');
-        alert("Критическая ошибка сети при запросе к скрипту.");
+        if (loader) loader.classList.remove('visible');
     };
 
-    document.body.appendChild(scriptTag);
-    console.log("Тег <script> добавлен в DOM. Ожидание ответа...");
+    document.body.appendChild(script);
 }
         
        // Build prompt for AI
