@@ -581,85 +581,33 @@
         
         // Get AI Insights
         async function getAIInsights() {
-            const btn = document.getElementById('btnGetInsights');
-            const loader = document.getElementById('aiLoader');
-            const response = document.getElementById('aiResponse');
-            
-            btn.disabled = true;
-            loader.classList.add('visible');
-            response.classList.remove('visible');
-            
             const prompt = buildPrompt();
-            
-            try {
-                const scriptUrl = localStorage.getItem('sheetsScriptUrl');
-                
-                if (!scriptUrl) {
-                    throw new Error('URL Apps Script не найден. Сначала подключись к Sheets в Hypothesis Tester.');
-                }
-                
-                // Используем JSONP через script tag
-                const callbackName = 'aiCallback_' + Date.now();
-                const aiUrl = scriptUrl + '?action=ai_insights&callback=' + callbackName + '&prompt=' + encodeURIComponent(prompt);
-                
-                // Создаём promise для callback
-                const result = await new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => {
-                        reject(new Error('Timeout - AI не ответил за 30 секунд'));
-                    }, 30000);
-                    
-                    window[callbackName] = function(data) {
-                        clearTimeout(timeout);
-                        delete window[callbackName];
-                        document.body.removeChild(script);
-                        resolve(data);
-                    };
-                    
-                    const script = document.createElement('script');
-                    script.src = aiUrl;
-                    script.onerror = () => {
-                        clearTimeout(timeout);
-                        delete window[callbackName];
-                        reject(new Error('Ошибка загрузки'));
-                    };
-                    document.body.appendChild(script);
-                });
-                
-                if (result.error) {
-                    throw new Error(result.error);
-                }
-                
-                document.getElementById('aiContent').textContent = result.insights || 'Нет ответа от AI';
-                response.classList.add('visible');
-                
-            } catch (error) {
-                document.getElementById('aiContent').textContent = '❌ Ошибка: ' + error.message + '\n\n' + generateLocalInsights();
-                response.classList.add('visible');
-                console.error('AI Error:', error);
-            } finally {
-                btn.disabled = false;
-                loader.classList.remove('visible');
-            }
-}
+            const resultDiv = document.getElementById('aiInsightsResult');
+            const btn = document.querySelector('.btn-ai');
         
-        // Локальный анализ (fallback)
-        function generateLocalInsights() {
-            const passed = analysisData.passed === true;
-            const metric = metricNames[analysisData.metric] || analysisData.metric;
-            
-            let topTags = [];
-            for (const [category, tags] of Object.entries(tagStats)) {
-                if (tags.length > 0 && parseFloat(tags[0].percent) >= 30) {
-                    topTags.push(`${category}: ${tags[0].tag} (${tags[0].percent}%)`);
-                }
-            }
-            
-            let insights = `📊 Локальный анализ (без AI):\n\n`;
-            insights += `Доминирующие теги:\n`;
-            insights += topTags.length > 0 ? topTags.map(t => `• ${t}`).join('\n') : '• Нет явно доминирующих';
-            
-            return insights;
+            // Показываем лоадер
+            resultDiv.innerHTML = '<div class="loading">Пожалуйста, подождите.</div>';
+            btn.disabled = true;
+        
+            // Вызываем функцию напрямую из Apps Script
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    btn.disabled = false;
+                    if (response.error) {
+                        resultDiv.innerHTML = '<div class="error">❌ Ошибка: ' + response.error + '</div>';
+                    } else {
+                        // Превращаем Markdown от Gemini в HTML переносы для красоты
+                        const formattedText = response.insights.replace(/\n/g, '<br>');
+                        resultDiv.innerHTML = '<div class="insight-text">' + formattedText + '</div>';
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    btn.disabled = false;
+                    resultDiv.innerHTML = '<div class="error">❌ Критическая ошибка: ' + err.message + '</div>';
+                })
+                .processAIAnalysis(prompt); 
         }
+        
         
         // Build prompt for AI
 function buildPrompt() {
