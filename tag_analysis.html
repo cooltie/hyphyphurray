@@ -672,7 +672,7 @@ function buildPrompt() {
     for (const [category, tags] of Object.entries(tagStats)) {
         if (tags.length > 0) {
             const topTag = tags[0];
-            tagSummary += category + ':' + topTag.tag + '(' + topTag.percent + '%);';
+            tagSummary += category + ':' + topTag.tag + '(' + topTag.percent + 'pct);';
         }
     }
     
