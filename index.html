@@ -896,6 +896,65 @@
                 groupBInputs.forEach(el => el.disabled = false);
             }
         }
+
+        // Функция для сбора и сохранения "рецепта" фильтров с подробным логированием
+function saveFiltersForAI() {
+    console.group("💾 [index.html] Подготовка рецепта для AI");
+    console.time("Recipe Creation");
+
+    try {
+        // Собираем все выбранные параметры из интерфейса
+        const recipe = {
+            hypothesisId: document.getElementById('hypothesisId').value,
+            groupA: {
+                tagType1: document.getElementById('tagType1A').value,
+                tagValue1: document.getElementById('tagValue1A').value,
+                tagType2: document.getElementById('tagType2A').value,
+                tagValue2: document.getElementById('tagValue2A').value,
+                tagType3: document.getElementById('tagType3A').value,
+                tagValue3: document.getElementById('tagValue3A').value
+            },
+            groupB: {
+                useStatic: document.getElementById('useStaticValue').checked,
+                staticValue: document.getElementById('staticValue').value,
+                tagType1: document.getElementById('tagType1B').value,
+                tagValue1: document.getElementById('tagValue1B').value,
+                tagType2: document.getElementById('tagType2B').value,
+                tagValue2: document.getElementById('tagValue2B').value,
+                tagType3: document.getElementById('tagType3B').value,
+                tagValue3: document.getElementById('tagValue3B').value
+            },
+            settings: {
+                metric: document.getElementById('metric').value,
+                condition: document.getElementById('condition').value,
+                conditionValue: document.getElementById('conditionValue').value
+            },
+            filter: {
+                metric: document.getElementById('filterMetric').value,
+                operator: document.getElementById('filterOperator').value,
+                value: document.getElementById('filterValue').value
+            },
+            timestamp: new Date().toISOString()
+        };
+
+        console.log("✅ Сформированный рецепт:", recipe);
+        
+        // Сохраняем для страницы tag_analysis.html
+        localStorage.setItem('ai_analysis_recipe', JSON.stringify(recipe));
+        
+        // Также убедимся, что URL скрипта сохранен (он нужен для запроса на бэк)
+        const scriptUrl = document.getElementById('scriptUrl').value.trim();
+        localStorage.setItem('sheetsScriptUrl', scriptUrl);
+        
+        console.log("📍 Рецепт и URL сохранены в localStorage");
+
+    } catch (e) {
+        console.error("❌ Ошибка при сохранении рецепта:", e);
+    } finally {
+        console.timeEnd("Recipe Creation");
+        console.groupEnd();
+    }
+}
         
         // Получить колонку в Combined_results для данного типа из Config
         function getColumnForType(configKey) {
@@ -1035,6 +1094,8 @@
         
         // Run the hypothesis test
         function runHypothesisTest() {
+            console.log("🚀 Запуск теста гипотезы...");
+            saveFiltersForAI();
             const hypId = document.getElementById('hypothesisId').value;
             
             // Get tags for Group A
