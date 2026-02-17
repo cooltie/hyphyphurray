@@ -579,125 +579,67 @@
             }
         }
         
-function getAIInsights() {
-    console.log("%c--- СТАРТ: getAIInsights (Серверная фильтрация) ---", "color: blue; font-weight: bold;");
-
+async function getAIInsights() {
+    console.group("🤖 [AI Analysis] Запрос к бэкенду");
+    
     const btn = document.getElementById('btnGetInsights');
     const loader = document.getElementById('aiLoader');
     const responseDiv = document.getElementById('aiResponse');
     const contentDiv = document.getElementById('aiContent');
-    const scriptUrl = localStorage.getItem('sheetsScriptUrl');
-
-    if (!scriptUrl) {
-        console.error("Ошибка: sheetsScriptUrl не найден в localStorage");
-        alert("Ошибка: Ссылка на скрипт отсутствует.");
-        return;
-    }
-
-// Безопасное получение ID гипотезы (если элемент есть и выбран)
-    const hypElem = document.getElementById('hypothesisId');
-    const hypId = hypElem ? hypElem.value : "";
-    const promptElem = document.getElementById('customPrompt');
-    const customPrompt = promptElem ? promptElem.value.trim() : "";
     
-   const tags = JSON.stringify(analysisData.filters || {});
+    // 1. Забираем ВТОРУЮ ЧАСТЬ промпта (ввод пользователя) прямо здесь
+    const userPromptText = document.getElementById('customPrompt').value.trim();
+    console.log("📝 Дополнительный вопрос пользователя:", userPromptText || "Отсутствует");
 
-    console.log("Отправляем инструкции. Выбрано:", { 
-        hypId: hypId || "все", 
-        tags: tags, 
-        metric: analysisData.metric 
-    });
-
-    // Индикация загрузки
     btn.disabled = true;
-    if (loader) loader.classList.add('visible');
-    if (responseDiv) responseDiv.classList.remove('visible');
+    loader.classList.add('visible');
+    responseDiv.classList.remove('visible');
+    contentDiv.textContent = 'Сервер фильтрует данные таблицы и готовит ответ...';
 
-    const callbackName = 'ai_cb_' + Date.now();
-    console.log("Создан callback для ответа:", callbackName);
+    try {
+        const scriptUrl = localStorage.getItem('sheetsScriptUrl');
+        const recipeRaw = localStorage.getItem('ai_analysis_recipe');
+        
+        if (!recipeRaw) throw new Error("Сначала запустите тест на главной странице!");
+        const recipe = JSON.parse(recipeRaw);
 
-    window[callbackName] = function(response) {
-        console.log("%c--- ОТВЕТ ОТ СЕРВЕРА ПОЛУЧЕН ---", "color: green; font-weight: bold;");
-        console.log("Результат:", response);
+        // 2. Формируем посылку. Мы не шлем CSV, мы шлем "инструкцию" и "вопрос"
+        const payload = {
+            action: 'ai_analysis',
+            recipe: recipe,
+            userQuestion: userPromptText // Передаем текст из интерфейса
+        };
 
-        btn.disabled = false;
-        if (loader) loader.classList.remove('visible');
+        console.log("🚀 Отправка данных на Google Script...");
+        
+        const response = await fetch(scriptUrl, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
 
-        if (response.error) {
-            console.error("Сервер вернул ошибку:", response.error);
-            alert("Ошибка: " + response.error);
-        } else if (response.insights) {
-            console.log("Отрисовка инсайтов в интерфейс...");
-            if (responseDiv) responseDiv.classList.add('visible');
-            
-            const formattedText = response.insights
-                .replace(/\n/g, '<br>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            
-            if (contentDiv) contentDiv.innerHTML = formattedText;
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            console.log("✅ Ответ от AI получен");
+            contentDiv.textContent = result.text;
+            responseDiv.classList.add('visible');
+        } else {
+            console.error("❌ Ошибка сервера:", result.message);
+            throw new Error(result.message);
         }
 
-        // Cleanup
-        delete window[callbackName];
-        const scriptElement = document.getElementById(callbackName);
-        if (scriptElement) scriptElement.remove();
-    };
-
-    const finalUrl = `${scriptUrl}?action=ai_insights_internal` + 
-                     `&hypId=${encodeURIComponent(hypId)}` + 
-                     `&metric=${encodeURIComponent(analysisData.metric)}` + 
-                     `&tags=${encodeURIComponent(tags)}` + 
-                     `&userQuestion=${encodeURIComponent(customPrompt)}` + 
-                     `&callback=${callbackName}`;
-
-    console.log("Финальный URL запроса (короткий):", finalUrl);
-
-    const script = document.createElement('script');
-    script.id = callbackName;
-    script.src = finalUrl;
-    
-    script.onerror = function() {
-        console.error("Ошибка сети или URL при попытке загрузить JSONP скрипт.");
+    } catch (error) {
+        console.error("💥 Ошибка:", error);
+        contentDiv.textContent = "Ошибка: " + error.message;
+        responseDiv.classList.add('visible');
+    } finally {
         btn.disabled = false;
-        if (loader) loader.classList.remove('visible');
-    };
-
-    document.body.appendChild(script);
-}
-        
-       // Build prompt for AI
-function buildPrompt() {
-    console.log("Начинаю сборку промпта..."); // Тут еще нет переменной prompt, поэтому логируем просто текст
-
-    const customPrompt = document.getElementById('customPrompt').value.trim();
-    
-    // 1. Проверка наличия данных
-    if (!analysisData || !analysisData.creatives || analysisData.creatives.length === 0) {
-        console.error("Ошибка: analysisData.creatives пуст!");
-        return "";
+        loader.classList.remove('visible');
+        console.groupEnd();
     }
-
-    const creatives = analysisData.creatives;
-    
-    // 2. Формируем CSV
-    const headers = Object.keys(creatives[0]);
-    const csvRows = creatives.map(c => headers.map(h => c[h]).join(";"));
-    const csvContent = headers.join(";") + "\n" + csvRows.join("\n");
-
-    // 3. Создаем переменную prompt (сначала объявляем!)
-    let prompt = `Проанализируй данные рекламных креативов (формат CSV, разделитель ;):\n\n`;
-    prompt += csvContent.substring(0, 15000); // Ограничиваем длину
-    
-    prompt += `\n\nМетрика теста: ${analysisData.metric}`;
-    prompt += `\nВопрос пользователя: ${customPrompt || "Сделай глубокий анализ: какие теги и комбинации дают лучший результат?"}`;
-    prompt += `\nОтветь на русском языке, структурировано.`;
-    
-    // 4. ТЕПЕРЬ можно логировать, так как prompt уже существует
-    console.log("Промпт успешно сформирован. Итоговая длина:", prompt.length);
-    
-    return prompt;
 }
         
+
         // Initialize on load
         document.addEventListener('DOMContentLoaded', init);
     </script>
