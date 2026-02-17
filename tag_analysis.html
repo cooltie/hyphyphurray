@@ -579,41 +579,50 @@
             }
         }
         
-        // Get AI Insights
-            function getAIInsights() {
-            const prompt = buildPrompt();
-            const resultDiv = document.getElementById('aiInsightsResult');
-            const btn = document.querySelector('.btn-ai');
-        
-            // Показываем лоадер
-            resultDiv.innerHTML = '<div class="loading">Пожалуйста, подождите.</div>';
-            btn.disabled = true;
+async function getAIInsights() {
+    // 1. Ищем или создаем блок для результата
+    let resultDiv = document.getElementById('aiInsightsResult');
+    if (!resultDiv) {
+        resultDiv = document.createElement('div');
+        resultDiv.id = 'aiInsightsResult';
+        // Ищем любой контейнер .card или просто добавляем в конец body
+        const container = document.querySelector('.card') || document.body;
+        container.appendChild(resultDiv);
+    }
 
-            if (!resultDiv) {
-        // Если забыла добавить div в HTML, это создаст его само
-            resultDiv = document.createElement('div');
-            resultDiv.id = 'aiInsightsResult';
-            document.querySelector('.card').appendChild(resultDiv);
+    // 2. Ищем кнопку (безопасно)
+    const btn = document.getElementById('btnGetInsights') || document.querySelector('.btn-ai');
+    
+    // 3. ПРОВЕРКА: Если данных для анализа нет
+    if (!analysisData || !analysisData.creatives) {
+        resultDiv.innerHTML = '<div class="error">❌ Данные не загружены. Вернитесь на главную и нажмите Run Test.</div>';
+        return;
+    }
+
+    const prompt = buildPrompt();
+
+    // 4. Проверяем кнопку перед тем как выключать её
+    if (btn) btn.disabled = true;
+    
+    resultDiv.innerHTML = '<div class="loading">🧠 Анализирую данные... это может занять до 30 секунд.</div>';
+
+    // Вызов скрипта
+    google.script.run
+        .withSuccessHandler(function(response) {
+            if (btn) btn.disabled = false;
+            if (response.error) {
+                resultDiv.innerHTML = '<div class="error">❌ Ошибка: ' + response.error + '</div>';
+            } else {
+                const formattedText = response.insights.replace(/\n/g, '<br>');
+                resultDiv.innerHTML = '<div class="insight-text">' + formattedText + '</div>';
             }
-        
-            // Вызываем функцию напрямую из Apps Script
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    btn.disabled = false;
-                    if (response.error) {
-                        resultDiv.innerHTML = '<div class="error">❌ Ошибка: ' + response.error + '</div>';
-                    } else {
-                        // Превращаем Markdown от Gemini в HTML переносы для красоты
-                        const formattedText = response.insights.replace(/\n/g, '<br>');
-                        resultDiv.innerHTML = '<div class="insight-text">' + formattedText + '</div>';
-                    }
-                })
-                .withFailureHandler(function(err) {
-                    btn.disabled = false;
-                    resultDiv.innerHTML = '<div class="error">❌ Критическая ошибка: ' + err.message + '</div>';
-                })
-                .processAIAnalysis(prompt); 
-        }
+        })
+        .withFailureHandler(function(err) {
+            if (btn) btn.disabled = false;
+            resultDiv.innerHTML = '<div class="error">❌ Критическая ошибка сервера: ' + err.message + '</div>';
+        })
+        .processAIAnalysis(prompt); 
+}
         
         
         // Build prompt for AI
