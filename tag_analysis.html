@@ -588,6 +588,13 @@
             // Показываем лоадер
             resultDiv.innerHTML = '<div class="loading">Пожалуйста, подождите.</div>';
             btn.disabled = true;
+
+            if (!resultDiv) {
+        // Если забыла добавить div в HTML, это создаст его само
+            resultDiv = document.createElement('div');
+            resultDiv.id = 'aiInsightsResult';
+            document.querySelector('.card').appendChild(resultDiv);
+            }
         
             // Вызываем функцию напрямую из Apps Script
             google.script.run
