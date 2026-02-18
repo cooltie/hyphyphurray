@@ -736,7 +736,7 @@
             'GEO': 'GEO',
             'Language': 'Language',
             'Lane': 'Lane',
-            'Campaign Type': 'Campaign Type',
+            'Campaign Type': 'Campaign_Type',
             'Stage': 'Stage',
             'Style': 'Style',
             'Variable': 'Variable',
@@ -744,12 +744,12 @@
             'Placement': 'Platform/Placement',
             'Format': 'Format',
             'Length': 'Length',
-            'CTA Tag': 'CTA Tag',
-            'Hook Tag': 'Hook Tag',
-            'Format Tag': 'Format Tag',
-            'Style Tag': 'Style Tag',
-            'Audience': 'Audience Tag',
-            'Visual_Tag': 'Visual Tag 1'
+            'CTA_Tag': 'CTA_Tag',
+            'Hook_Tag': 'Hook_Tag',
+            'Format_Tag': 'Format_Tag',
+            'Style_Tag': 'Style_Tag',
+            'Audience_Tag': 'Audience_Tag',
+            'Visual_Tag': 'Visual_Tag' 
         };
         
         // Initialize tag type dropdowns
@@ -985,20 +985,19 @@ function filterData(data, tagsArray) {
             // СПЕЦИАЛЬНАЯ ЛОГИКА ДЛЯ VISUAL TAG
             // Проверяем наличие значения в любой из трех колонок объекта
             if (key === 'Visual_Tag') {
-                const v1 = row['Visual Tag 1'] ? String(row['Visual Tag 1']).trim() : "";
-                const v2 = row['Visual Tag 2'] ? String(row['Visual Tag 2']).trim() : "";
-                const v3 = row['Visual Tag 3'] ? String(row['Visual Tag 3']).trim() : "";
+                const v1 = String(row['Visual_Tag_1'] || "").trim();
+                const v2 = String(row['Visual_Tag_2'] || "").trim();
+                const v3 = String(row['Visual_Tag_3'] || "").trim();
                 
-                const target = String(val).trim();
-                return v1 === target || v2 === target || v3 === target;
+             
+                return v1 === val || v2 === val || v3 === val;
             }
 
             // ОБЫЧНАЯ ЛОГИКА
-            // Ищем имя колонки в маппинге (например, 'CTA_Tag' -> 'CTA Tag')
-            const colName = (typeof tagTypeToColumn !== 'undefined' ? tagTypeToColumn[key] : key) || key;
-            const rowValue = row[colName] ? String(row[colName]).trim() : "";
+            const colName = tagTypeToColumn[key] || key;
+            const rowValue = String(row[colName] || "").trim();
             
-            return rowValue === String(val).trim();
+            return rowValue === val;
         });
     });
 }
