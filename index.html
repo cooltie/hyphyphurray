@@ -965,68 +965,73 @@ function saveFiltersForAI() {
         }
         
         // Filter data by tags
-function filterData(data, tags) {
-    if (Object.keys(tags).length === 0) return data;
+function filterData(data, tagsArray) {
+    // Если данных нет, возвращаем пустой массив, чтобы не ломать цепочку
+    if (!data || !Array.isArray(data) || data.length === 0) return [];
     
-    const headers = data[0];
-    const rows = data.slice(1);
-    
-    // Индексы для визуальных тегов (ищем один раз для скорости)
-    const v1Idx = headers.indexOf('Visual Tag 1');
-    const v2Idx = headers.indexOf('Visual Tag 2');
-    const v3Idx = headers.indexOf('Visual Tag 3');
-    
-    return [headers, ...rows.filter(row => {
-        for (let key in tags) {
-            const val = tags[key];
-            
+    // Если фильтры не заданы, возвращаем данные как есть
+    if (!tagsArray || tagsArray.length === 0) return data;
+
+    console.log("🔍 Фильтрация по тегам (объекты):", tagsArray);
+
+    return data.filter(row => {
+        // Каждая строка должна соответствовать ВСЕМ выбранным тегам (логика AND)
+        return tagsArray.every(tag => {
+            const key = tag.type;
+            const val = tag.value;
+
+            if (!val || val === 'all') return true;
+
             // СПЕЦИАЛЬНАЯ ЛОГИКА ДЛЯ VISUAL TAG
+            // Проверяем наличие значения в любой из трех колонок объекта
             if (key === 'Visual_Tag') {
-                const match = (v1Idx !== -1 && row[v1Idx] === val) || 
-                              (v2Idx !== -1 && row[v2Idx] === val) || 
-                              (v3Idx !== -1 && row[v3Idx] === val);
-                if (!match) return false;
-                continue; // Переходим к следующему тегу в фильтре
+                const v1 = row['Visual Tag 1'] ? String(row['Visual Tag 1']).trim() : "";
+                const v2 = row['Visual Tag 2'] ? String(row['Visual Tag 2']).trim() : "";
+                const v3 = row['Visual Tag 3'] ? String(row['Visual Tag 3']).trim() : "";
+                
+                const target = String(val).trim();
+                return v1 === target || v2 === target || v3 === target;
             }
 
-            // ОБЫЧНАЯ ЛОГИКА (для остальных тегов)
-            const colName = tagTypeToColumn[key] || key;
-            const colIndex = headers.indexOf(colName);
+            // ОБЫЧНАЯ ЛОГИКА
+            // Ищем имя колонки в маппинге (например, 'CTA_Tag' -> 'CTA Tag')
+            const colName = (typeof tagTypeToColumn !== 'undefined' ? tagTypeToColumn[key] : key) || key;
+            const rowValue = row[colName] ? String(row[colName]).trim() : "";
             
-            if (colIndex !== -1 && String(row[colIndex]).trim() !== String(val).trim()) {
-                return false;
-            }
-        }
-        return true;
-    })];
+            return rowValue === String(val).trim();
+        });
+    });
 }
         
-        // Filter by Hypothesis ID
-        function filterByHypothesis(data, hypId) {
-            if (!hypId) return data;
-            return data.filter(row => row['Hypothesis ID'] === hypId);
+    function filterByHypothesis(data, hypId) {
+    if (!data || !Array.isArray(data)) return []; // Защита от пустых данных
+    if (!hypId || hypId === 'all') return data;
+    
+    return data.filter(row => row['Hypothesis ID'] === hypId);
+}
+
+function applyDataFilter(data) {
+    if (!data || !Array.isArray(data)) return [];
+    
+    const filterMetric = document.getElementById('filterMetric').value;
+    const filterOperator = document.getElementById('filterOperator').value;
+    const filterValue = parseFloat(document.getElementById('filterValue').value) || 0;
+    
+    if (!filterMetric || filterMetric === 'none') return data;
+    
+    return data.filter(row => {
+        // Извлекаем значение из объекта по ключу-метрике
+        const value = parseFloat(row[filterMetric]) || 0;
+        switch (filterOperator) {
+            case '>': return value > filterValue;
+            case '<': return value < filterValue;
+            case '=': return value === filterValue;
+            case '>=': return value >= filterValue;
+            case '<=': return value <= filterValue;
+            default: return true;
         }
-        
-        // Apply data filter
-        function applyDataFilter(data) {
-            const filterMetric = document.getElementById('filterMetric').value;
-            const filterOperator = document.getElementById('filterOperator').value;
-            const filterValue = parseFloat(document.getElementById('filterValue').value) || 0;
-            
-            if (!filterMetric) return data;
-            
-            return data.filter(row => {
-                const value = parseFloat(row[filterMetric]) || 0;
-                switch (filterOperator) {
-                    case '>': return value > filterValue;
-                    case '<': return value < filterValue;
-                    case '=': return value === filterValue;
-                    case '>=': return value >= filterValue;
-                    case '<=': return value <= filterValue;
-                    default: return true;
-                }
-            });
-        }
+    });
+}
         
         // Calculate metric for a dataset
         function calculateMetric(data, metric) {
