@@ -744,10 +744,10 @@
             'Placement': 'Platform/Placement',
             'Format': 'Format',
             'Length': 'Length',
-            'CTA_Tag': 'CTA Tag',
-            'Hook_Tag': 'Hook Tag',
-            'Format_Tag': 'Format Tag',
-            'Style_Tag': 'Style Tag',
+            'CTA Tag': 'CTA Tag',
+            'Hook Tag': 'Hook Tag',
+            'Format Tag': 'Format Tag',
+            'Style Tag': 'Style Tag',
             'Audience': 'Audience Tag',
             'Visual_Tag': 'Visual Tag 1'
         };
@@ -965,23 +965,41 @@ function saveFiltersForAI() {
         }
         
         // Filter data by tags
-        function filterData(data, tags) {
-            return data.filter(row => {
-                for (const tag of tags) {
-                    if (tag.type && tag.value) {
-                        const columnName = getColumnForType(tag.type);
-                        if (columnName && row[columnName] !== undefined) {
-                            if (String(row[columnName]).toLowerCase() !== String(tag.value).toLowerCase()) {
-                                return false;
-                            }
-                        } else {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            });
+function filterData(data, tags) {
+    if (Object.keys(tags).length === 0) return data;
+    
+    const headers = data[0];
+    const rows = data.slice(1);
+    
+    // Индексы для визуальных тегов (ищем один раз для скорости)
+    const v1Idx = headers.indexOf('Visual Tag 1');
+    const v2Idx = headers.indexOf('Visual Tag 2');
+    const v3Idx = headers.indexOf('Visual Tag 3');
+    
+    return [headers, ...rows.filter(row => {
+        for (let key in tags) {
+            const val = tags[key];
+            
+            // СПЕЦИАЛЬНАЯ ЛОГИКА ДЛЯ VISUAL TAG
+            if (key === 'Visual_Tag') {
+                const match = (v1Idx !== -1 && row[v1Idx] === val) || 
+                              (v2Idx !== -1 && row[v2Idx] === val) || 
+                              (v3Idx !== -1 && row[v3Idx] === val);
+                if (!match) return false;
+                continue; // Переходим к следующему тегу в фильтре
+            }
+
+            // ОБЫЧНАЯ ЛОГИКА (для остальных тегов)
+            const colName = tagTypeToColumn[key] || key;
+            const colIndex = headers.indexOf(colName);
+            
+            if (colIndex !== -1 && String(row[colIndex]).trim() !== String(val).trim()) {
+                return false;
+            }
         }
+        return true;
+    })];
+}
         
         // Filter by Hypothesis ID
         function filterByHypothesis(data, hypId) {
