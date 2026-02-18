@@ -410,12 +410,12 @@
             'Stage': 'Stage',
             'Style': 'Style',
             'Format': 'Format',
-            'Hook Tag': 'Hook Tag',
-            'Format Tag': 'Format Tag',
-            'Style Tag': 'Style Tag',
-            'CTA Tag': 'CTA Tag',
-            'Audience Tag': 'Audience Tag',
-            'Visual Tag 1': 'Visual Tag 1'
+            'Hook_Tag': 'Hook_Tag',
+            'Format_Tag': 'Format_Tag',
+            'Style_Tag': 'Style_Tag',
+            'CTA_Tag': 'CTA_Tag',
+            'Audience_Tag': 'Audience_Tag',
+            'Visual_Tag_1': 'Visual_Tag',
         };
         
         // Metric names
@@ -582,14 +582,14 @@
 async function getAIInsights() {
     console.group("🤖 [AI Analysis] Запрос к бэкенду");
     
-    const btn = document.getElementById('btnGetInsights');
+    const btn = document.getElementById('btnGetInsights'); // Проверь ID кнопки
     const loader = document.getElementById('aiLoader');
     const responseDiv = document.getElementById('aiResponse');
     const contentDiv = document.getElementById('aiContent');
     
-    // 1. Забираем ВТОРУЮ ЧАСТЬ промпта (ввод пользователя) прямо здесь
+    // 1. Забираем вопрос пользователя
     const userPromptText = document.getElementById('customPrompt').value.trim();
-    console.log("📝 Дополнительный вопрос пользователя:", userPromptText || "Отсутствует");
+    console.log("📝 Дополнительный вопрос:", userPromptText || "Нет (стандартный анализ)");
 
     btn.disabled = true;
     loader.classList.add('visible');
@@ -597,41 +597,52 @@ async function getAIInsights() {
     contentDiv.textContent = 'Сервер фильтрует данные таблицы и готовит ответ...';
 
     try {
-        const scriptUrl = localStorage.getItem('sheetsScriptUrl');
-        const recipeRaw = localStorage.getItem('ai_analysis_recipe');
+        const scriptUrl = localStorage.getItem('sheetsScriptUrl'); // Или document.getElementById('scriptUrl').value
+        const recipeRaw = localStorage.getItem('ai_analysis_recipe'); // Берем сохраненный рецепт
         
-        if (!recipeRaw) throw new Error("Сначала запустите тест на главной странице!");
+        if (!scriptUrl) throw new Error("Не найден URL скрипта!");
+        if (!recipeRaw) throw new Error("Сначала сформируйте гипотезу/рецепт на главной странице!");
+        
         const recipe = JSON.parse(recipeRaw);
 
-        // 2. Формируем посылку. Мы не шлем CSV, мы шлем "" и "вопрос"
-        const payload = {
-            action: 'ai_analysis',
-            recipe: recipe,
-            userQuestion: userPromptText // Передаем текст из интерфейса
-        };
+        // 2. Формируем параметры для GET-запроса (URLSearchParams)
+        // action должен совпадать с тем, что в hyp.gs (ai_insights_internal)
+        const params = new URLSearchParams({
+            action: 'ai_insights_internal',
+            tags: JSON.stringify(recipe.tags), // Передаем только объект тегов из рецепта
+            userQuestion: userPromptText
+        });
 
-        console.log("🚀 Отправка данных в Google Script...");
+        console.log("🚀 Отправка GET запроса в Google Script...", Object.fromEntries(params));
         
-        const response = await fetch(scriptUrl, {
-            method: 'POST',
-            body: JSON.stringify(payload)
+        // 3. Отправляем запрос
+        const response = await fetch(`${scriptUrl}?${params.toString()}`, {
+            method: 'GET'
         });
 
         const result = await response.json();
-        console.log("Debug Log с сервера:", result.debugLog); 
         
-        if (result.status === 'success') {
-            console.log("✅ Ответ от AI получен");
-            contentDiv.textContent = result.text;
+        // 4. Обрабатываем новый формат ответа (insights + debugCount)
+        if (result.insights) {
+            console.log(`✅ Ответ от AI получен. Проанализировано строк: ${result.debugCount}`);
+            
+            // Если у тебя подключен marked.js для красивого текста, используй marked.parse(result.insights)
+            // Если нет — просто result.insights
+            contentDiv.innerHTML = (typeof marked !== 'undefined') ? marked.parse(result.insights) : result.insights;
+            
             responseDiv.classList.add('visible');
-        } else {
-            console.error("❌ Ошибка сервера:", result.message);
-            throw new Error(result.message);
+            
+            if (result.debugCount === 0) {
+                console.warn("⚠️ Внимание: AI не нашел строк по этим фильтрам.");
+                alert("AI ответил, но нашел 0 строк данных. Проверьте фильтры.");
+            }
+        } else if (result.error) {
+            console.error("❌ Ошибка сервера:", result.error);
+            throw new Error(result.error);
         }
-         console.log("Debug Log с сервера:", result.debugLog);
 
     } catch (error) {
-        console.error("💥 Ошибка:", error);
+        console.error("💥 Критическая ошибка:", error);
         contentDiv.textContent = "Ошибка: " + error.message;
         responseDiv.classList.add('visible');
     } finally {
