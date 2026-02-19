@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,20 +11,20 @@
             margin: 0;
             padding: 0;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f7fa;
             color: #333;
             line-height: 1.6;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
+
         header {
             background: linear-gradient(135deg, #6f42c1, #4a2c82);
             color: white;
@@ -32,24 +33,24 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
         }
-        
+
         header h1 {
             font-size: 28px;
             margin-bottom: 10px;
         }
-        
+
         header p {
             opacity: 0.9;
         }
-        
+
         .card {
             background: white;
             border-radius: 12px;
             padding: 25px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
-        
+
         .card h2 {
             font-size: 18px;
             color: #6f42c1;
@@ -57,48 +58,53 @@
             padding-bottom: 10px;
             border-bottom: 2px solid #e8ecf1;
         }
-        
+
         .test-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
         }
-        
+
         .summary-item {
             background: #f8f9fa;
             padding: 15px;
             border-radius: 8px;
             text-align: center;
         }
-        
+
         .summary-item .label {
             font-size: 12px;
             color: #666;
             margin-bottom: 5px;
         }
-        
+
         .summary-item .value {
             font-size: 18px;
             font-weight: 700;
             color: #333;
         }
-        
-        .summary-item .value.success { color: #28a745; }
-        .summary-item .value.fail { color: #dc3545; }
-        
+
+        .summary-item .value.success {
+            color: #28a745;
+        }
+
+        .summary-item .value.fail {
+            color: #dc3545;
+        }
+
         .tag-categories {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
         }
-        
+
         .tag-category {
             background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
         }
-        
+
         .tag-category h3 {
             font-size: 14px;
             color: #6f42c1;
@@ -106,7 +112,7 @@
             padding-bottom: 8px;
             border-bottom: 1px solid #ddd;
         }
-        
+
         .tag-item {
             display: flex;
             justify-content: space-between;
@@ -114,21 +120,21 @@
             padding: 8px 0;
             border-bottom: 1px solid #eee;
         }
-        
+
         .tag-item:last-child {
             border-bottom: none;
         }
-        
+
         .tag-name {
             font-weight: 500;
         }
-        
+
         .tag-stats {
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        
+
         .tag-count {
             background: #6f42c1;
             color: white;
@@ -137,12 +143,12 @@
             font-size: 12px;
             font-weight: 600;
         }
-        
+
         .tag-percent {
             color: #666;
             font-size: 13px;
         }
-        
+
         .tag-bar {
             width: 60px;
             height: 6px;
@@ -150,17 +156,17 @@
             border-radius: 3px;
             overflow: hidden;
         }
-        
+
         .tag-bar-fill {
             height: 100%;
             background: linear-gradient(90deg, #6f42c1, #9b6dd7);
             border-radius: 3px;
         }
-        
+
         .ai-section {
             margin-top: 30px;
         }
-        
+
         .btn-ai {
             background: linear-gradient(135deg, #00b4d8, #0077b6);
             color: white;
@@ -175,29 +181,30 @@
             width: 100%;
             margin-bottom: 20px;
         }
-        
+
         .btn-ai:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(0, 180, 216, 0.4);
         }
-        
+
         .btn-ai:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
+
         .prompt-section {
             margin-bottom: 20px;
         }
-        
+
         .prompt-section label {
             display: block;
             font-weight: 600;
             margin-bottom: 8px;
             color: #333;
         }
-        
+
         .prompt-section textarea {
             width: 100%;
             min-height: 100px;
@@ -209,18 +216,18 @@
             resize: vertical;
             transition: border-color 0.2s;
         }
-        
+
         .prompt-section textarea:focus {
             outline: none;
             border-color: #00b4d8;
         }
-        
+
         .prompt-hint {
             font-size: 12px;
             color: #888;
             margin-top: 5px;
         }
-        
+
         .ai-response {
             background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
             border: 1px solid #bae6fd;
@@ -228,11 +235,11 @@
             padding: 25px;
             display: none;
         }
-        
+
         .ai-response.visible {
             display: block;
         }
-        
+
         .ai-response h4 {
             color: #0077b6;
             margin-bottom: 15px;
@@ -240,12 +247,12 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .ai-response .content {
             white-space: pre-wrap;
             line-height: 1.8;
         }
-        
+
         .btn-back {
             background: #6c757d;
             color: white;
@@ -257,32 +264,32 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .btn-back:hover {
             background: #545b62;
         }
-        
+
         .no-data {
             text-align: center;
             padding: 60px 20px;
             color: #666;
         }
-        
+
         .no-data h2 {
             color: #999;
             margin-bottom: 15px;
         }
-        
+
         .loader {
             display: none;
             text-align: center;
             padding: 20px;
         }
-        
+
         .loader.visible {
             display: block;
         }
-        
+
         .loader-spinner {
             width: 40px;
             height: 40px;
@@ -292,11 +299,13 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
-        
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .empty-category {
             color: #999;
             font-style: italic;
@@ -304,13 +313,14 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
             <h1>🏷️ Tag Analysis</h1>
             <p>Анализ тегов креативов и AI инсайты</p>
         </header>
-        
+
         <!-- No Data State -->
         <div class="card no-data" id="noDataSection">
             <h2>⚠️ Нет данных для анализа</h2>
@@ -318,10 +328,10 @@
             <br>
             <a href="index.html" class="btn-back">← Вернуться к тестированию</a>
         </div>
-        
+
         <!-- Main Content -->
         <div id="mainContent" style="display: none;">
-            
+
             <!-- Test Summary -->
             <div class="card">
                 <h2>📊 Результат теста</h2>
@@ -356,7 +366,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Tag Statistics -->
             <div class="card">
                 <h2>🏷️ Статистика тегов (<span id="totalCreatives">0</span> креативов)</h2>
@@ -364,44 +374,45 @@
                     <!-- Заполняется динамически -->
                 </div>
             </div>
-            
-           <!-- AI Insights -->
-<div class="card ai-section">
-    <h2>🤖 AI Инсайты</h2>
-    
-    <div class="prompt-section">
-        <label for="customPrompt">Твой вопрос к AI (опционально):</label>
-        <textarea id="customPrompt" placeholder="Например: Какие хуки лучше работают в комбинации с UGC форматом? Что стоит тестировать дальше?"></textarea>
-        <div class="prompt-hint">Оставь пустым для стандартного анализа тегов</div>
-    </div>
-    
-    <button class="btn-ai" id="btnGetInsights" onclick="getAIInsights()">
-        ✨ Получить AI инсайты
-    </button>
-    
-    <div class="loader" id="aiLoader">
-        <div class="loader-spinner"></div>
-        <div>Анализирую данные...</div>
-    </div>
-    
-    <div class="ai-response" id="aiResponse">
-        <h4>💡 Рекомендации</h4>
-        <div class="content" id="aiContent"></div>
-    </div>
-</div>
-            
+
+            <!-- AI Insights -->
+            <div class="card ai-section">
+                <h2>🤖 AI Инсайты</h2>
+
+                <div class="prompt-section">
+                    <label for="customPrompt">Твой вопрос к AI (опционально):</label>
+                    <textarea id="customPrompt"
+                        placeholder="Например: Какие хуки лучше работают в комбинации с UGC форматом? Что стоит тестировать дальше?"></textarea>
+                    <div class="prompt-hint">Оставь пустым для стандартного анализа тегов</div>
+                </div>
+
+                <button class="btn-ai" id="btnGetInsights" onclick="getAIInsights()">
+                    ✨ Получить AI инсайты
+                </button>
+
+                <div class="loader" id="aiLoader">
+                    <div class="loader-spinner"></div>
+                    <div>Анализирую данные...</div>
+                </div>
+
+                <div class="ai-response" id="aiResponse">
+                    <h4>💡 Рекомендации</h4>
+                    <div class="content" id="aiContent"></div>
+                </div>
+            </div>
+
             <!-- Navigation -->
             <div style="margin-top: 20px;">
                 <a href="index.html" class="btn-back">← Вернуться к тестированию</a>
             </div>
         </div>
     </div>
-    
+
     <script>
         // Global data
         let analysisData = null;
         let tagStats = {};
-        
+
         // Tag categories to analyze
         const tagCategories = {
             'GEO': 'GEO',
@@ -417,7 +428,7 @@
             'Audience_Tag': 'Audience_Tag',
             'Visual_Tag_1': 'Visual_Tag',
         };
-        
+
         // Metric names
         const metricNames = {
             'CTR': 'CTR',
@@ -427,11 +438,11 @@
             'CR': 'CR (Account/Onboarded)',
             'ThruPlay_Rate': 'ThruPlay Rate'
         };
-        
+
         // Format value based on metric
         function formatValue(value, metric) {
             if (value === null || value === undefined) return 'N/A';
-            
+
             if (metric && metric.includes('CPA')) {
                 return '€' + value.toFixed(2);
             } else if (metric === 'CR' || metric === 'ThruPlay_Rate' || metric === 'CTR') {
@@ -439,55 +450,55 @@
             }
             return value.toFixed(2);
         }
-        
+
         // Initialize page
         function init() {
             // Load data from localStorage
             const dataStr = localStorage.getItem('tagAnalysisData');
-            
+
             if (!dataStr) {
                 document.getElementById('noDataSection').style.display = 'block';
                 document.getElementById('mainContent').style.display = 'none';
                 return;
             }
-            
+
             try {
                 analysisData = JSON.parse(dataStr);
-                
+
                 if (!analysisData.creatives || analysisData.creatives.length === 0) {
                     document.getElementById('noDataSection').style.display = 'block';
                     document.getElementById('mainContent').style.display = 'none';
                     return;
                 }
-                
+
                 document.getElementById('noDataSection').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
-                
+
                 displaySummary();
                 calculateTagStats();
                 displayTagStats();
-                
+
             } catch (e) {
                 console.error('Error parsing data:', e);
                 document.getElementById('noDataSection').style.display = 'block';
                 document.getElementById('mainContent').style.display = 'none';
             }
         }
-        
+
         // Display test summary
         function displaySummary() {
             document.getElementById('summaryHypId').textContent = analysisData.hypothesisId || 'N/A';
             document.getElementById('summaryMetric').textContent = metricNames[analysisData.metric] || analysisData.metric;
             document.getElementById('summaryValueA').textContent = formatValue(analysisData.valueA, analysisData.metric);
             document.getElementById('summaryValueB').textContent = formatValue(analysisData.valueB, analysisData.metric);
-            
+
             const diffEl = document.getElementById('summaryDiff');
             if (analysisData.diff !== null) {
                 diffEl.textContent = (analysisData.diff >= 0 ? '+' : '') + analysisData.diff.toFixed(1) + '%';
             } else {
                 diffEl.textContent = 'N/A';
             }
-            
+
             const resultEl = document.getElementById('summaryResult');
             if (analysisData.passed === true) {
                 resultEl.textContent = '✅ Да';
@@ -499,21 +510,21 @@
                 resultEl.textContent = '⚠️ N/A';
                 resultEl.className = 'value';
             }
-            
+
             document.getElementById('summaryCount').textContent = analysisData.creatives.length;
             document.getElementById('totalCreatives').textContent = analysisData.creatives.length;
         }
-        
+
         // Calculate tag statistics
         function calculateTagStats() {
             tagStats = {};
             const total = analysisData.creatives.length;
-            
+
             // Initialize categories
             for (const [key, label] of Object.entries(tagCategories)) {
                 tagStats[label] = {};
             }
-            
+
             // Count tags
             analysisData.creatives.forEach(creative => {
                 for (const [key, label] of Object.entries(tagCategories)) {
@@ -526,7 +537,7 @@
                     }
                 }
             });
-            
+
             // Calculate percentages and sort
             for (const category of Object.keys(tagStats)) {
                 const sorted = Object.entries(tagStats[category])
@@ -536,20 +547,20 @@
                         percent: (count / total * 100).toFixed(1)
                     }))
                     .sort((a, b) => b.count - a.count);
-                
+
                 tagStats[category] = sorted;
             }
         }
-        
+
         // Display tag statistics
         function displayTagStats() {
             const container = document.getElementById('tagCategories');
             container.innerHTML = '';
-            
+
             for (const [category, tags] of Object.entries(tagStats)) {
                 const categoryDiv = document.createElement('div');
                 categoryDiv.className = 'tag-category';
-                
+
                 let tagsHtml = '';
                 if (tags.length === 0) {
                     tagsHtml = '<div class="empty-category">Нет данных</div>';
@@ -569,95 +580,98 @@
                         `;
                     });
                 }
-                
+
                 categoryDiv.innerHTML = `
                     <h3>${category}</h3>
                     ${tagsHtml}
                 `;
-                
+
                 container.appendChild(categoryDiv);
             }
         }
-        
-async function getAIInsights() {
-    console.group("🤖 [AI Analysis] Запрос к бэкенду");
-    
-    const btn = document.getElementById('btnGetInsights'); // Проверь ID кнопки
-    const loader = document.getElementById('aiLoader');
-    const responseDiv = document.getElementById('aiResponse');
-    const contentDiv = document.getElementById('aiContent');
-    
-    // 1. Забираем вопрос пользователя
-    const userPromptText = document.getElementById('customPrompt').value.trim();
-    console.log("📝 Дополнительный вопрос:", userPromptText || "Нет (стандартный анализ)");
 
-    btn.disabled = true;
-    loader.classList.add('visible');
-    responseDiv.classList.remove('visible');
-    contentDiv.textContent = 'Сервер фильтрует данные таблицы и готовит ответ...';
+        async function getAIInsights() {
+            console.group("🤖 [AI Analysis] Запрос к бэкенду");
 
-    try {
-        const scriptUrl = localStorage.getItem('sheetsScriptUrl'); // Или document.getElementById('scriptUrl').value
-        const recipeRaw = localStorage.getItem('ai_analysis_recipe'); // Берем сохраненный рецепт
-        
-        if (!scriptUrl) throw new Error("Не найден URL скрипта!");
-        if (!recipeRaw) throw new Error("Сначала сформируйте гипотезу/рецепт на главной странице!");
-        
-        const recipe = JSON.parse(recipeRaw);
+            const btn = document.getElementById('btnGetInsights'); // Проверь ID кнопки
+            const loader = document.getElementById('aiLoader');
+            const responseDiv = document.getElementById('aiResponse');
+            const contentDiv = document.getElementById('aiContent');
 
-        // 2. Достаем теги. Если они лежат внутри .tags — берем их, иначе берем весь объект
-        const tagsToSend = recipe.tags ? recipe.tags : recipe;
-        
-        // 2. Формируем параметры для GET-запроса (URLSearchParams)
-        // action должен совпадать с тем, что в hyp.gs (ai_insights_internal)
-        const params = new URLSearchParams({
-            action: 'ai_insights_internal',
-            tags: JSON.stringify(tagsToSend), // Передаем только объект тегов из рецепта
-            userQuestion: userPromptText
-        });
-        console.log("🚀 Отправка тегов на сервер:", tagsToSend);
-        console.log("🚀 Отправка GET запроса в Google Script...", Object.fromEntries(params));
-        
-        // 3. Отправляем запрос
-        const response = await fetch(`${scriptUrl}?${params.toString()}`, {
-            method: 'GET'
-        });
+            // 1. Забираем вопрос пользователя
+            const userPromptText = document.getElementById('customPrompt').value.trim();
+            console.log("📝 Дополнительный вопрос:", userPromptText || "Нет (стандартный анализ)");
 
-        const result = await response.json();
-        
-        // 4. Обрабатываем новый формат ответа (insights + debugCount)
-        if (result.insights) {
-            console.log(`✅ Ответ от AI получен. Проанализировано строк: ${result.debugCount}`);
-            
-            // Если у тебя подключен marked.js для красивого текста, используй marked.parse(result.insights)
-            // Если нет — просто result.insights
-            contentDiv.innerHTML = (typeof marked !== 'undefined') ? marked.parse(result.insights) : result.insights;
-            
-            responseDiv.classList.add('visible');
-            
-            if (result.debugCount === 0) {
-                console.warn("⚠️ Внимание: AI не нашел строк по этим фильтрам.");
-                alert("AI ответил, но нашел 0 строк данных. Проверьте фильтры.");
+            btn.disabled = true;
+            loader.classList.add('visible');
+            responseDiv.classList.remove('visible');
+            contentDiv.textContent = 'Сервер фильтрует данные таблицы и готовит ответ...';
+
+            try {
+                const scriptUrl = localStorage.getItem('sheetsScriptUrl'); // Или document.getElementById('scriptUrl').value
+                const recipeRaw = localStorage.getItem('ai_analysis_recipe'); // Берем сохраненный рецепт
+
+                if (!scriptUrl) throw new Error("Не найден URL скрипта!");
+                if (!recipeRaw) throw new Error("Сначала сформируйте гипотезу/рецепт на главной странице!");
+
+                const recipe = JSON.parse(recipeRaw);
+
+                // 2. Достаем теги. Если они лежат внутри .tags — берем их, иначе берем весь объект
+                const tagsToSend = recipe.tags ? recipe.tags : recipe;
+
+                // 2. Формируем параметры для GET-запроса (URLSearchParams)
+                // action должен совпадать с тем, что в hyp.gs (ai_insights_internal)
+                const params = new URLSearchParams({
+                    action: 'ai_insights_internal',
+                    tags: JSON.stringify(tagsToSend), // Передаем только объект тегов из рецепта
+                    userQuestion: userPromptText
+                });
+                console.log("� Данные, которые уходят на сервер (tagsToSend):", JSON.parse(JSON.stringify(tagsToSend)));
+                console.log("🚀 Отправка GET запроса в Google Script...", Object.fromEntries(params));
+
+                // 3. Отправляем запрос
+                const response = await fetch(`${scriptUrl}?${params.toString()}`, {
+                    method: 'GET'
+                });
+
+                const result = await response.json();
+                console.log("🔍 ПОЛНЫЙ ОТВЕТ ОТ СЕРВЕРА:", result); // <-- смотри сюда — вся структура ответа
+
+                // 4. Обрабатываем новый формат ответа (insights + debugCount)
+                if (result.insights) {
+                    const rowCount = result.debugCount ?? result.rowCount ?? result.count ?? result.totalRows ?? '(поле не найдено)';
+                    console.log(`✅ Ответ от AI получен. Проанализировано строк: ${rowCount}`, '| Все поля ответа:', Object.keys(result));
+
+                    // Если у тебя подключен marked.js для красивого текста, используй marked.parse(result.insights)
+                    // Если нет — просто result.insights
+                    contentDiv.innerHTML = (typeof marked !== 'undefined') ? marked.parse(result.insights) : result.insights;
+
+                    responseDiv.classList.add('visible');
+
+                    if (result.debugCount === 0) {
+                        console.warn("⚠️ Внимание: AI не нашел строк по этим фильтрам.");
+                        alert("AI ответил, но нашел 0 строк данных. Проверьте фильтры.");
+                    }
+                } else if (result.error) {
+                    console.error("❌ Ошибка сервера:", result.error);
+                    throw new Error(result.error);
+                }
+
+            } catch (error) {
+                console.error("💥 Критическая ошибка:", error);
+                contentDiv.textContent = "Ошибка: " + error.message;
+                responseDiv.classList.add('visible');
+            } finally {
+                btn.disabled = false;
+                loader.classList.remove('visible');
+                console.groupEnd();
             }
-        } else if (result.error) {
-            console.error("❌ Ошибка сервера:", result.error);
-            throw new Error(result.error);
         }
 
-    } catch (error) {
-        console.error("💥 Критическая ошибка:", error);
-        contentDiv.textContent = "Ошибка: " + error.message;
-        responseDiv.classList.add('visible');
-    } finally {
-        btn.disabled = false;
-        loader.classList.remove('visible');
-        console.groupEnd();
-    }
-}
-        
 
         // Initialize on load
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>
