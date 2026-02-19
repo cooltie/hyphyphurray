@@ -605,14 +605,17 @@ async function getAIInsights() {
         
         const recipe = JSON.parse(recipeRaw);
 
+        // 2. Достаем теги. Если они лежат внутри .tags — берем их, иначе берем весь объект
+        const tagsToSend = recipe.tags ? recipe.tags : recipe;
+        
         // 2. Формируем параметры для GET-запроса (URLSearchParams)
         // action должен совпадать с тем, что в hyp.gs (ai_insights_internal)
         const params = new URLSearchParams({
             action: 'ai_insights_internal',
-            tags: JSON.stringify(recipe.tags), // Передаем только объект тегов из рецепта
+            tags: JSON.stringify(tagsToSend), // Передаем только объект тегов из рецепта
             userQuestion: userPromptText
         });
-
+        console.log("🚀 Отправка тегов на сервер:", tagsToSend);
         console.log("🚀 Отправка GET запроса в Google Script...", Object.fromEntries(params));
         
         // 3. Отправляем запрос
