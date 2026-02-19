@@ -598,7 +598,7 @@ async function getAIInsights() {
 
     try {
         const scriptUrl = localStorage.getItem('sheetsScriptUrl'); // Или document.getElementById('scriptUrl').value
-        const recipeRaw = localStorage.getItem('ai_analysis_recipe'); // Берем сохраненный рецепт
+        const recipeRaw = localStorage.getItem('lastHypothesisRecipe'); // Берем сохраненный рецепт
         
         if (!scriptUrl) throw new Error("Не найден URL скрипта!");
         if (!recipeRaw) throw new Error("Сначала сформируйте гипотезу/рецепт на главной странице!");
