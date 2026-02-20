@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tag Analysis</title>
+    <!-- Markdown рендерер для ответа Gemini -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -240,12 +242,38 @@
             display: block;
         }
 
+        .ai-response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
         .ai-response h4 {
             color: #0077b6;
-            margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
+            margin: 0;
+        }
+
+        .btn-ai-copy {
+            background: #ffffff;
+            border: 1px solid #bae6fd;
+            color: #0077b6;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+        }
+
+        .btn-ai-copy:hover {
+            background: #e0f2fe;
+            box-shadow: 0 2px 6px rgba(0, 119, 182, 0.2);
         }
 
         .ai-response .content {
@@ -396,7 +424,12 @@
                 </div>
 
                 <div class="ai-response" id="aiResponse">
-                    <h4>💡 Рекомендации</h4>
+                    <div class="ai-response-header">
+                        <h4>💡 Рекомендации</h4>
+                        <button type="button" class="btn-ai-copy" onclick="copyAIResponse()">
+                            Скопировать ответ
+                        </button>
+                    </div>
                     <div class="content" id="aiContent"></div>
                 </div>
             </div>
@@ -675,6 +708,27 @@
                 loader.classList.remove('visible');
                 console.groupEnd();
             }
+        }
+
+        // Скопировать ответ AI в буфер обмена
+        function copyAIResponse() {
+            const contentDiv = document.getElementById('aiContent');
+            if (!contentDiv || !contentDiv.textContent.trim()) {
+                alert('Пока нечего копировать — сначала получи ответ AI.');
+                return;
+            }
+
+            const textToCopy = contentDiv.innerText || contentDiv.textContent;
+
+            navigator.clipboard.writeText(textToCopy).then(
+                () => {
+                    alert('Ответ AI скопирован в буфер обмена.');
+                },
+                (err) => {
+                    console.error('Не удалось скопировать текст:', err);
+                    alert('Не удалось скопировать ответ. Попробуй ещё раз.');
+                }
+            );
         }
 
 
