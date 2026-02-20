@@ -1442,6 +1442,9 @@
 
             // Сохраняем состояние формы перед переходом
             saveFormState();
+            
+            // Сохраняем рецепт для AI анализа (нужен для tag_analysis.html)
+            saveFiltersForAI();
 
             // Сохраняем данные в localStorage для передачи
             const analysisData = {

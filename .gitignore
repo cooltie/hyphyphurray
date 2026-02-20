@@ -1,0 +1,17 @@
+# Google Apps Script files (local development)
+*.gs
+
+# Environment files
+.env
+.env.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
