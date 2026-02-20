@@ -891,7 +891,7 @@
 
                 localStorage.setItem('sheetsScriptUrl', url);
 
-                // Восстанавливаем состояние формы после загрузки данных
+                // Восстанавливаем состояние формы и дропдауны значений после загрузки данных
                 setTimeout(() => {
                     restoreFormState();
                 }, 300);
@@ -1323,7 +1323,7 @@
         }
 
 
-        // Сохранить состояние формы
+        // Сохранить состояние формы (без больших массивов данных)
         function saveFormState() {
             const state = {
                 // Группа A
@@ -1353,8 +1353,18 @@
                 // Статичное значение
                 useStaticValue: document.getElementById('useStaticValue').checked,
                 staticValue: document.getElementById('staticValue').value,
-                // Результаты
-                lastResult: lastResult
+                // Результаты (только метаданные, без больших массивов)
+                hasResult: !!lastResult,
+                resultMeta: lastResult ? {
+                    metric: lastResult.metric,
+                    valueA: lastResult.valueA,
+                    valueB: lastResult.valueB,
+                    diff: lastResult.diff,
+                    passed: lastResult.passed,
+                    useStatic: lastResult.useStatic,
+                    countA: lastResult.dataA ? lastResult.dataA.length : 0,
+                    countB: lastResult.dataB ? lastResult.dataB.length : 0
+                } : null
             };
             localStorage.setItem('indexFormState', JSON.stringify(state));
         }
@@ -1367,6 +1377,13 @@
             const valueSelect = document.getElementById(valueSelectId);
             
             if (!typeSelect || !valueSelect) return;
+            
+            // Проверяем, есть ли данные для дропдауна (tagConfig должен быть загружен)
+            if (Object.keys(tagConfig).length === 0) {
+                // Данные еще не загружены, просто сохраняем значение типа
+                typeSelect.value = typeValue;
+                return;
+            }
             
             typeSelect.value = typeValue;
             updateValueDropdown(typeSelectId, valueSelectId);
@@ -1394,15 +1411,15 @@
 
                 // Восстанавливаем значения группы A
                 if (state.hypothesisId) document.getElementById('hypothesisId').value = state.hypothesisId;
-                restoreDropdownValue('tagType1A', 'tagValue1A', state.tagType1A, state.tagValue1A);
-                restoreDropdownValue('tagType2A', 'tagValue2A', state.tagType2A, state.tagValue2A);
-                restoreDropdownValue('tagType3A', 'tagValue3A', state.tagType3A, state.tagValue3A);
+                if (state.tagType1A) restoreDropdownValue('tagType1A', 'tagValue1A', state.tagType1A, state.tagValue1A);
+                if (state.tagType2A) restoreDropdownValue('tagType2A', 'tagValue2A', state.tagType2A, state.tagValue2A);
+                if (state.tagType3A) restoreDropdownValue('tagType3A', 'tagValue3A', state.tagType3A, state.tagValue3A);
 
                 // Восстанавливаем значения группы B
                 if (state.hypothesisIdB) document.getElementById('hypothesisIdB').value = state.hypothesisIdB;
-                restoreDropdownValue('tagType1B', 'tagValue1B', state.tagType1B, state.tagValue1B);
-                restoreDropdownValue('tagType2B', 'tagValue2B', state.tagType2B, state.tagValue2B);
-                restoreDropdownValue('tagType3B', 'tagValue3B', state.tagType3B, state.tagValue3B);
+                if (state.tagType1B) restoreDropdownValue('tagType1B', 'tagValue1B', state.tagType1B, state.tagValue1B);
+                if (state.tagType2B) restoreDropdownValue('tagType2B', 'tagValue2B', state.tagType2B, state.tagValue2B);
+                if (state.tagType3B) restoreDropdownValue('tagType3B', 'tagValue3B', state.tagType3B, state.tagValue3B);
 
                 // Восстанавливаем настройки
                 if (state.metric) document.getElementById('metric').value = state.metric;
@@ -1421,13 +1438,7 @@
                     if (state.staticValue !== undefined) document.getElementById('staticValue').value = state.staticValue;
                 }
 
-                // Восстанавливаем результаты (только если есть данные)
-                if (state.lastResult && sheetsData.length > 0) {
-                    lastResult = state.lastResult;
-                    setTimeout(() => {
-                        displayResults(lastResult);
-                    }, 500);
-                }
+                // Результаты не восстанавливаем - пользователь должен запустить тест заново после подключения
             } catch (e) {
                 console.error('Ошибка восстановления состояния:', e);
             }
@@ -1498,14 +1509,13 @@
             const savedUrl = localStorage.getItem('sheetsScriptUrl');
             if (savedUrl) {
                 document.getElementById('scriptUrl').value = savedUrl;
-                // Если URL сохранен, пытаемся автоматически подключиться
-                // и восстановить состояние после загрузки данных
+                // Автоматически подключаемся к Google Sheets при возврате с tag_analysis
                 connectToSheets();
             } else {
-                // Если данных нет, просто восстанавливаем состояние формы
+                // Восстанавливаем состояние формы сразу при загрузке (если вернулись с tag_analysis)
                 setTimeout(() => {
                     restoreFormState();
-                }, 200);
+                }, 100);
             }
         });
 
