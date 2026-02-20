@@ -882,6 +882,16 @@
                 tagConfig = data.tagConfig || {};
                 hypothesisIds = data.hypothesisIds || [];
 
+                // Сохраняем данные в localStorage для восстановления при возврате
+                try {
+                    localStorage.setItem('sheetsData', JSON.stringify(sheetsData));
+                    localStorage.setItem('tagConfig', JSON.stringify(tagConfig));
+                    localStorage.setItem('hypothesisIds', JSON.stringify(hypothesisIds));
+                    localStorage.setItem('sheetsDataTimestamp', new Date().toISOString());
+                } catch (e) {
+                    console.warn('Не удалось сохранить данные в localStorage (возможно, слишком большой объем):', e);
+                }
+
                 updateTypeDropdownsFromConfig();
                 updateHypothesisDropdown();
 
@@ -1502,6 +1512,36 @@
             });
         }
 
+        // Загрузить данные из localStorage
+        function loadDataFromStorage() {
+            try {
+                const savedSheetsData = localStorage.getItem('sheetsData');
+                const savedTagConfig = localStorage.getItem('tagConfig');
+                const savedHypothesisIds = localStorage.getItem('hypothesisIds');
+
+                if (savedSheetsData && savedTagConfig && savedHypothesisIds) {
+                    sheetsData = JSON.parse(savedSheetsData);
+                    tagConfig = JSON.parse(savedTagConfig);
+                    hypothesisIds = JSON.parse(savedHypothesisIds);
+
+                    updateTypeDropdownsFromConfig();
+                    updateHypothesisDropdown();
+
+                    const status = document.getElementById('connectionStatus');
+                    const timestamp = localStorage.getItem('sheetsDataTimestamp');
+                    const dateStr = timestamp ? new Date(timestamp).toLocaleString('ru-RU') : '';
+                    status.textContent = `Подключено (${sheetsData.length} строк)${dateStr ? ' - ' + dateStr : ''}`;
+                    status.className = 'status-badge status-connected';
+                    document.getElementById('runTest').disabled = false;
+
+                    return true;
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки данных из localStorage:', e);
+            }
+            return false;
+        }
+
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             initTagDropdowns();
@@ -1509,8 +1549,19 @@
             const savedUrl = localStorage.getItem('sheetsScriptUrl');
             if (savedUrl) {
                 document.getElementById('scriptUrl').value = savedUrl;
-                // Автоматически подключаемся к Google Sheets при возврате с tag_analysis
-                connectToSheets();
+                
+                // Пытаемся загрузить данные из localStorage
+                const dataLoaded = loadDataFromStorage();
+                
+                if (dataLoaded) {
+                    // Данные загружены из кэша, восстанавливаем состояние формы
+                    setTimeout(() => {
+                        restoreFormState();
+                    }, 200);
+                } else {
+                    // Данных нет в кэше, подключаемся к Google Sheets
+                    connectToSheets();
+                }
             } else {
                 // Восстанавливаем состояние формы сразу при загрузке (если вернулись с tag_analysis)
                 setTimeout(() => {
