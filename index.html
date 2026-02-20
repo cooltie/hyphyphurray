@@ -175,10 +175,23 @@
             background: white;
         }
 
+        .settings-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 900px) {
+            .settings-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .settings-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
 
         .setting-item label {
@@ -200,9 +213,23 @@
 
         .filter-row {
             display: grid;
-            grid-template-columns: 1fr auto 100px;
+            grid-template-columns: 1fr auto 110px;
             gap: 10px;
             align-items: end;
+        }
+
+        .filter-row select,
+        .filter-row input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .filter-row input {
+            max-width: 140px;
+            justify-self: flex-start;
         }
 
         .btn-primary {
@@ -642,54 +669,58 @@
             <div class="card" style="background: #f8f9fa;">
                 <h2>⚙️ Настройки</h2>
 
-                <div class="settings-grid">
-                    <div class="setting-item">
-                        <label>Метрика сравнения</label>
-                        <select id="metric">
-                            <option value="CTR">CTR (Click-through Rate)</option>
-                            <option value="CPA_Onboarded">CPA Onboarded</option>
-                            <option value="CPA_Account_Open">CPA Account Open</option>
-                            <option value="CPA_Onboarded_2">CPA Onboarded (Onb>2)</option>
-                            <option value="CR">CR (Account/Onboarded) %</option>
-                            <option value="ThruPlay_Rate">ThruPlay Rate %</option>
-                        </select>
+                <div class="settings-layout">
+                    <div>
+                        <div class="settings-grid">
+                            <div class="setting-item">
+                                <label>Метрика сравнения</label>
+                                <select id="metric">
+                                    <option value="CTR">CTR (Click-through Rate)</option>
+                                    <option value="CPA_Onboarded">CPA Onboarded</option>
+                                    <option value="CPA_Account_Open">CPA Account Open</option>
+                                    <option value="CPA_Onboarded_2">CPA Onboarded (Onb>2)</option>
+                                    <option value="CR">CR (Account/Onboarded) %</option>
+                                    <option value="ThruPlay_Rate">ThruPlay Rate %</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-item">
+                                <label>Условие</label>
+                                <select id="condition">
+                                    <option value="greater">A больше B</option>
+                                    <option value="less">A меньше B</option>
+                                    <option value="greaterPercent">A больше B на %</option>
+                                    <option value="lessPercent">A меньше B на %</option>
+                                </select>
+                            </div>
+
+                            <div class="setting-item">
+                                <label>Значение % (если нужно)</label>
+                                <input type="number" id="conditionValue" min="0" max="100" placeholder="Например 10">
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="setting-item">
-                        <label>Условие</label>
-                        <select id="condition">
-                            <option value="greater">A больше B</option>
-                            <option value="less">A меньше B</option>
-                            <option value="greaterPercent">A больше B на %</option>
-                            <option value="lessPercent">A меньше B на %</option>
-                        </select>
-                    </div>
-
-                    <div class="setting-item">
-                        <label>Значение % (если нужно)</label>
-                        <input type="number" id="conditionValue" value="10" min="0" max="100">
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <label
-                        style="font-weight: 600; color: #555; font-size: 13px; display: block; margin-bottom: 8px;">Фильтр
-                        данных (опционально)</label>
-                    <div class="filter-row">
-                        <select id="filterMetric">
-                            <option value="">-- Без фильтра --</option>
-                            <option value="Onboarded">Onboarded</option>
-                            <option value="Impressions">Impressions</option>
-                            <option value="Amount Spent">Amount Spent</option>
-                        </select>
-                        <select id="filterOperator">
-                            <option value=">">&gt;</option>
-                            <option value="<">&lt;</option>
-                            <option value="=">=</option>
-                            <option value=">=">&gt;=</option>
-                            <option value="<=">&lt;=</option>
-                        </select>
-                        <input type="number" id="filterValue" placeholder="Значение" value="0">
+                    <div>
+                        <label
+                            style="font-weight: 600; color: #555; font-size: 13px; display: block; margin-bottom: 8px;">Фильтр
+                            данных (опционально)</label>
+                        <div class="filter-row">
+                            <select id="filterMetric">
+                                <option value="">-- Без фильтра --</option>
+                                <option value="Onboarded">Onboarded</option>
+                                <option value="Impressions">Impressions</option>
+                                <option value="Amount Spent">Amount Spent</option>
+                            </select>
+                            <select id="filterOperator">
+                                <option value=">">&gt;</option>
+                                <option value="<">&lt;</option>
+                                <option value="=">=</option>
+                                <option value=">=">&gt;=</option>
+                                <option value="<=">&lt;=</option>
+                            </select>
+                            <input type="number" id="filterValue" placeholder="Значение" value="0">
+                        </div>
                     </div>
                 </div>
             </div>
