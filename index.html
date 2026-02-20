@@ -891,6 +891,11 @@
 
                 localStorage.setItem('sheetsScriptUrl', url);
 
+                // Восстанавливаем состояние формы после загрузки данных
+                setTimeout(() => {
+                    restoreFormState();
+                }, 300);
+
             } catch (error) {
                 status.textContent = 'Ошибка подключения';
                 status.className = 'status-badge status-disconnected';
@@ -1318,12 +1323,125 @@
         }
 
 
+        // Сохранить состояние формы
+        function saveFormState() {
+            const state = {
+                // Группа A
+                hypothesisId: document.getElementById('hypothesisId').value,
+                tagType1A: document.getElementById('tagType1A').value,
+                tagValue1A: document.getElementById('tagValue1A').value,
+                tagType2A: document.getElementById('tagType2A').value,
+                tagValue2A: document.getElementById('tagValue2A').value,
+                tagType3A: document.getElementById('tagType3A').value,
+                tagValue3A: document.getElementById('tagValue3A').value,
+                // Группа B
+                hypothesisIdB: document.getElementById('hypothesisIdB').value,
+                tagType1B: document.getElementById('tagType1B').value,
+                tagValue1B: document.getElementById('tagValue1B').value,
+                tagType2B: document.getElementById('tagType2B').value,
+                tagValue2B: document.getElementById('tagValue2B').value,
+                tagType3B: document.getElementById('tagType3B').value,
+                tagValue3B: document.getElementById('tagValue3B').value,
+                // Настройки
+                metric: document.getElementById('metric').value,
+                condition: document.getElementById('condition').value,
+                conditionValue: document.getElementById('conditionValue').value,
+                // Фильтры
+                filterMetric: document.getElementById('filterMetric').value,
+                filterOperator: document.getElementById('filterOperator').value,
+                filterValue: document.getElementById('filterValue').value,
+                // Статичное значение
+                useStaticValue: document.getElementById('useStaticValue').checked,
+                staticValue: document.getElementById('staticValue').value,
+                // Результаты
+                lastResult: lastResult
+            };
+            localStorage.setItem('indexFormState', JSON.stringify(state));
+        }
+
+        // Восстановить значение в дропдауне с ожиданием обновления
+        function restoreDropdownValue(typeSelectId, valueSelectId, typeValue, valueValue) {
+            if (!typeValue) return;
+            
+            const typeSelect = document.getElementById(typeSelectId);
+            const valueSelect = document.getElementById(valueSelectId);
+            
+            if (!typeSelect || !valueSelect) return;
+            
+            typeSelect.value = typeValue;
+            updateValueDropdown(typeSelectId, valueSelectId);
+            
+            // Ждем обновления дропдауна значений
+            const checkValue = () => {
+                if (valueSelect.options.length > 1) {
+                    if (valueValue) {
+                        valueSelect.value = valueValue;
+                    }
+                } else {
+                    setTimeout(checkValue, 50);
+                }
+            };
+            setTimeout(checkValue, 100);
+        }
+
+        // Восстановить состояние формы
+        function restoreFormState() {
+            const stateStr = localStorage.getItem('indexFormState');
+            if (!stateStr) return;
+
+            try {
+                const state = JSON.parse(stateStr);
+
+                // Восстанавливаем значения группы A
+                if (state.hypothesisId) document.getElementById('hypothesisId').value = state.hypothesisId;
+                restoreDropdownValue('tagType1A', 'tagValue1A', state.tagType1A, state.tagValue1A);
+                restoreDropdownValue('tagType2A', 'tagValue2A', state.tagType2A, state.tagValue2A);
+                restoreDropdownValue('tagType3A', 'tagValue3A', state.tagType3A, state.tagValue3A);
+
+                // Восстанавливаем значения группы B
+                if (state.hypothesisIdB) document.getElementById('hypothesisIdB').value = state.hypothesisIdB;
+                restoreDropdownValue('tagType1B', 'tagValue1B', state.tagType1B, state.tagValue1B);
+                restoreDropdownValue('tagType2B', 'tagValue2B', state.tagType2B, state.tagValue2B);
+                restoreDropdownValue('tagType3B', 'tagValue3B', state.tagType3B, state.tagValue3B);
+
+                // Восстанавливаем настройки
+                if (state.metric) document.getElementById('metric').value = state.metric;
+                if (state.condition) document.getElementById('condition').value = state.condition;
+                if (state.conditionValue !== undefined) document.getElementById('conditionValue').value = state.conditionValue;
+
+                // Восстанавливаем фильтры
+                if (state.filterMetric) document.getElementById('filterMetric').value = state.filterMetric;
+                if (state.filterOperator) document.getElementById('filterOperator').value = state.filterOperator;
+                if (state.filterValue !== undefined) document.getElementById('filterValue').value = state.filterValue;
+
+                // Восстанавливаем статичное значение
+                if (state.useStaticValue !== undefined) {
+                    document.getElementById('useStaticValue').checked = state.useStaticValue;
+                    toggleStaticValue();
+                    if (state.staticValue !== undefined) document.getElementById('staticValue').value = state.staticValue;
+                }
+
+                // Восстанавливаем результаты (только если есть данные)
+                if (state.lastResult && sheetsData.length > 0) {
+                    lastResult = state.lastResult;
+                    setTimeout(() => {
+                        displayResults(lastResult);
+                    }, 500);
+                }
+            } catch (e) {
+                console.error('Ошибка восстановления состояния:', e);
+            }
+        }
+
         // Go to tag analysis page
         function goToTagAnalysis() {
             if (!lastResult || lastResult.dataA.length === 0) {
                 alert('Сначала запусти тест с данными в группе A');
                 return;
             }
+
+            // Сохраняем состояние формы перед переходом
+            saveFormState();
 
             // Сохраняем данные в localStorage для передачи
             const analysisData = {
@@ -1377,6 +1495,14 @@
             const savedUrl = localStorage.getItem('sheetsScriptUrl');
             if (savedUrl) {
                 document.getElementById('scriptUrl').value = savedUrl;
+                // Если URL сохранен, пытаемся автоматически подключиться
+                // и восстановить состояние после загрузки данных
+                connectToSheets();
+            } else {
+                // Если данных нет, просто восстанавливаем состояние формы
+                setTimeout(() => {
+                    restoreFormState();
+                }, 200);
             }
         });
 
