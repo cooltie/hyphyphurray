@@ -589,9 +589,14 @@
 
                     <div class="hypothesis-row">
                         <label>📅 Период (опционально)</label>
-                        <select id="monthA">
-                            <option value="">-- Все время --</option>
-                        </select>
+                        <div class="tag-row" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+                            <select id="monthFromA">
+                                <option value="">-- От --</option>
+                            </select>
+                            <select id="monthToA">
+                                <option value="">-- До --</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="tag-row">
@@ -636,9 +641,14 @@
 
                     <div class="hypothesis-row">
                         <label>📅 Период (опционально)</label>
-                        <select id="monthB">
-                            <option value="">-- Все время --</option>
-                        </select>
+                        <div class="tag-row" style="border-bottom:none; margin-bottom:0; padding-bottom:0;">
+                            <select id="monthFromB">
+                                <option value="">-- От --</option>
+                            </select>
+                            <select id="monthToB">
+                                <option value="">-- До --</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="tag-row">
@@ -891,15 +901,18 @@
         // Обновить дропдауны месяцев
         function updateMonthDropdowns() {
             const selects = [
-                document.getElementById('monthA'),
-                document.getElementById('monthB')
+                document.getElementById('monthFromA'),
+                document.getElementById('monthToA'),
+                document.getElementById('monthFromB'),
+                document.getElementById('monthToB')
             ];
 
             const months = [...new Set(sheetsData.map(row => row['Month']).filter(Boolean))].sort();
 
             selects.forEach(select => {
                 const currentVal = select.value;
-                select.innerHTML = '<option value="">-- Все время --</option>';
+                const isFrom = select.id.includes('From');
+                select.innerHTML = `<option value="">-- ${isFrom ? 'От' : 'До'} --</option>`;
                 months.forEach(month => {
                     select.innerHTML += `<option value="${month}">${month}</option>`;
                 });
@@ -1028,7 +1041,8 @@
                 const recipe = {
                     hypothesisId: document.getElementById('hypothesisId').value,
                     groupA: {
-                        month: document.getElementById('monthA').value,
+                        monthFrom: document.getElementById('monthFromA').value,
+                        monthTo: document.getElementById('monthToA').value,
                         tagType1: document.getElementById('tagType1A').value,
                         tagValue1: document.getElementById('tagValue1A').value,
                         tagType2: document.getElementById('tagType2A').value,
@@ -1038,7 +1052,8 @@
                     },
                     groupB: {
                         hypothesisId: document.getElementById('hypothesisIdB').value,
-                        month: document.getElementById('monthB').value,
+                        monthFrom: document.getElementById('monthFromB').value,
+                        monthTo: document.getElementById('monthToB').value,
                         useStatic: document.getElementById('useStaticValue').checked,
                         staticValue: document.getElementById('staticValue').value,
                         tagType1: document.getElementById('tagType1B').value,
@@ -1245,8 +1260,10 @@
             const hypIdA = document.getElementById('hypothesisId').value;
             const hypIdB = document.getElementById('hypothesisIdB').value;
 
-            const monthA = document.getElementById('monthA').value;
-            const monthB = document.getElementById('monthB').value;
+            const monthFromA = document.getElementById('monthFromA').value;
+            const monthToA = document.getElementById('monthToA').value;
+            const monthFromB = document.getElementById('monthFromB').value;
+            const monthToB = document.getElementById('monthToB').value;
 
             // Get tags for Group A
             const tagsA = [
@@ -1277,11 +1294,14 @@
             let baseA = filterByHypothesis(baseData, hypIdA);
             let baseB = filterByHypothesis(baseData, hypIdB);
 
-            if (monthA) baseA = baseA.filter(row => row['Month'] === monthA);
-            if (monthB) baseB = baseB.filter(row => row['Month'] === monthB);
+            if (monthFromA) baseA = baseA.filter(row => row['Month'] >= monthFromA);
+            if (monthToA) baseA = baseA.filter(row => row['Month'] <= monthToA);
 
-            console.log(`📌 Group A: Hypothesis="${hypIdA}", Month="${monthA}" → ${baseA.length} строк базы`);
-            console.log(`📌 Group B: Hypothesis="${hypIdB}", Month="${monthB}" → ${baseB.length} строк базы`);
+            if (monthFromB) baseB = baseB.filter(row => row['Month'] >= monthFromB);
+            if (monthToB) baseB = baseB.filter(row => row['Month'] <= monthToB);
+
+            console.log(`📌 Group A: Hypothesis="${hypIdA}", Month="${monthFromA || 'Any'} - ${monthToA || 'Any'}" → ${baseA.length} строк базы`);
+            console.log(`📌 Group B: Hypothesis="${hypIdB}", Month="${monthFromB || 'Any'} - ${monthToB || 'Any'}" → ${baseB.length} строк базы`);
 
             // Применяем теги к каждой группе
             const dataA = filterData(baseA, tagsA);
@@ -1414,7 +1434,8 @@
             const state = {
                 // Группа A
                 hypothesisId: document.getElementById('hypothesisId').value,
-                monthA: document.getElementById('monthA').value,
+                monthFromA: document.getElementById('monthFromA').value,
+                monthToA: document.getElementById('monthToA').value,
                 tagType1A: document.getElementById('tagType1A').value,
                 tagValue1A: document.getElementById('tagValue1A').value,
                 tagType2A: document.getElementById('tagType2A').value,
@@ -1423,7 +1444,8 @@
                 tagValue3A: document.getElementById('tagValue3A').value,
                 // Группа B
                 hypothesisIdB: document.getElementById('hypothesisIdB').value,
-                monthB: document.getElementById('monthB').value,
+                monthFromB: document.getElementById('monthFromB').value,
+                monthToB: document.getElementById('monthToB').value,
                 tagType1B: document.getElementById('tagType1B').value,
                 tagValue1B: document.getElementById('tagValue1B').value,
                 tagType2B: document.getElementById('tagType2B').value,
@@ -1499,14 +1521,16 @@
 
                 // Восстанавливаем значения группы A
                 if (state.hypothesisId) document.getElementById('hypothesisId').value = state.hypothesisId;
-                if (state.monthA) document.getElementById('monthA').value = state.monthA;
+                if (state.monthFromA) document.getElementById('monthFromA').value = state.monthFromA;
+                if (state.monthToA) document.getElementById('monthToA').value = state.monthToA;
                 if (state.tagType1A) restoreDropdownValue('tagType1A', 'tagValue1A', state.tagType1A, state.tagValue1A);
                 if (state.tagType2A) restoreDropdownValue('tagType2A', 'tagValue2A', state.tagType2A, state.tagValue2A);
                 if (state.tagType3A) restoreDropdownValue('tagType3A', 'tagValue3A', state.tagType3A, state.tagValue3A);
 
                 // Восстанавливаем значения группы B
                 if (state.hypothesisIdB) document.getElementById('hypothesisIdB').value = state.hypothesisIdB;
-                if (state.monthB) document.getElementById('monthB').value = state.monthB;
+                if (state.monthFromB) document.getElementById('monthFromB').value = state.monthFromB;
+                if (state.monthToB) document.getElementById('monthToB').value = state.monthToB;
                 if (state.tagType1B) restoreDropdownValue('tagType1B', 'tagValue1B', state.tagType1B, state.tagValue1B);
                 if (state.tagType2B) restoreDropdownValue('tagType2B', 'tagValue2B', state.tagType2B, state.tagValue2B);
                 if (state.tagType3B) restoreDropdownValue('tagType3B', 'tagValue3B', state.tagType3B, state.tagValue3B);
