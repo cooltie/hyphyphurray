@@ -587,6 +587,13 @@
                         </select>
                     </div>
 
+                    <div class="hypothesis-row">
+                        <label>📅 Период (опционально)</label>
+                        <select id="monthA">
+                            <option value="">-- Все время --</option>
+                        </select>
+                    </div>
+
                     <div class="tag-row">
                         <select id="tagType1A" onchange="updateValueDropdown('tagType1A', 'tagValue1A')">
                             <option value="">-- Тип тега 1 --</option>
@@ -624,6 +631,13 @@
                         <label>📋 Hypothesis ID (опционально)</label>
                         <select id="hypothesisIdB">
                             <option value="">-- Выберите гипотезу --</option>
+                        </select>
+                    </div>
+
+                    <div class="hypothesis-row">
+                        <label>📅 Период (опционально)</label>
+                        <select id="monthB">
+                            <option value="">-- Все время --</option>
                         </select>
                     </div>
 
@@ -874,6 +888,28 @@
             });
         }
 
+        // Обновить дропдауны месяцев
+        function updateMonthDropdowns() {
+            const selects = [
+                document.getElementById('monthA'),
+                document.getElementById('monthB')
+            ];
+
+            const months = [...new Set(sheetsData.map(row => row['Month']).filter(Boolean))].sort();
+
+            selects.forEach(select => {
+                const currentVal = select.value;
+                select.innerHTML = '<option value="">-- Все время --</option>';
+                months.forEach(month => {
+                    select.innerHTML += `<option value="${month}">${month}</option>`;
+                });
+
+                if (currentVal && months.includes(currentVal)) {
+                    select.value = currentVal;
+                }
+            });
+        }
+
         // Показать/скрыть лоадер
         function showLoader(show, text = 'Загрузка данных...') {
             const loader = document.getElementById('loader');
@@ -925,6 +961,7 @@
 
                 updateTypeDropdownsFromConfig();
                 updateHypothesisDropdown();
+                updateMonthDropdowns();
 
                 status.textContent = `Подключено (${sheetsData.length} строк)`;
                 status.className = 'status-badge status-connected';
@@ -991,6 +1028,7 @@
                 const recipe = {
                     hypothesisId: document.getElementById('hypothesisId').value,
                     groupA: {
+                        month: document.getElementById('monthA').value,
                         tagType1: document.getElementById('tagType1A').value,
                         tagValue1: document.getElementById('tagValue1A').value,
                         tagType2: document.getElementById('tagType2A').value,
@@ -1000,6 +1038,7 @@
                     },
                     groupB: {
                         hypothesisId: document.getElementById('hypothesisIdB').value,
+                        month: document.getElementById('monthB').value,
                         useStatic: document.getElementById('useStaticValue').checked,
                         staticValue: document.getElementById('staticValue').value,
                         tagType1: document.getElementById('tagType1B').value,
@@ -1206,6 +1245,9 @@
             const hypIdA = document.getElementById('hypothesisId').value;
             const hypIdB = document.getElementById('hypothesisIdB').value;
 
+            const monthA = document.getElementById('monthA').value;
+            const monthB = document.getElementById('monthB').value;
+
             // Get tags for Group A
             const tagsA = [
                 { type: document.getElementById('tagType1A').value, value: document.getElementById('tagValue1A').value },
@@ -1232,11 +1274,14 @@
             const baseData = applyDataFilter(sheetsData);
 
             // Каждая группа фильтруется по своему Hypothesis ID независимо
-            const baseA = filterByHypothesis(baseData, hypIdA);
-            const baseB = filterByHypothesis(baseData, hypIdB);
+            let baseA = filterByHypothesis(baseData, hypIdA);
+            let baseB = filterByHypothesis(baseData, hypIdB);
 
-            console.log(`📌 Group A: Hypothesis="${hypIdA}" → ${baseA.length} строк базы`);
-            console.log(`📌 Group B: Hypothesis="${hypIdB}" → ${baseB.length} строк базы`);
+            if (monthA) baseA = baseA.filter(row => row['Month'] === monthA);
+            if (monthB) baseB = baseB.filter(row => row['Month'] === monthB);
+
+            console.log(`📌 Group A: Hypothesis="${hypIdA}", Month="${monthA}" → ${baseA.length} строк базы`);
+            console.log(`📌 Group B: Hypothesis="${hypIdB}", Month="${monthB}" → ${baseB.length} строк базы`);
 
             // Применяем теги к каждой группе
             const dataA = filterData(baseA, tagsA);
@@ -1369,6 +1414,7 @@
             const state = {
                 // Группа A
                 hypothesisId: document.getElementById('hypothesisId').value,
+                monthA: document.getElementById('monthA').value,
                 tagType1A: document.getElementById('tagType1A').value,
                 tagValue1A: document.getElementById('tagValue1A').value,
                 tagType2A: document.getElementById('tagType2A').value,
@@ -1377,6 +1423,7 @@
                 tagValue3A: document.getElementById('tagValue3A').value,
                 // Группа B
                 hypothesisIdB: document.getElementById('hypothesisIdB').value,
+                monthB: document.getElementById('monthB').value,
                 tagType1B: document.getElementById('tagType1B').value,
                 tagValue1B: document.getElementById('tagValue1B').value,
                 tagType2B: document.getElementById('tagType2B').value,
@@ -1413,22 +1460,22 @@
         // Восстановить значение в дропдауне с ожиданием обновления
         function restoreDropdownValue(typeSelectId, valueSelectId, typeValue, valueValue) {
             if (!typeValue) return;
-            
+
             const typeSelect = document.getElementById(typeSelectId);
             const valueSelect = document.getElementById(valueSelectId);
-            
+
             if (!typeSelect || !valueSelect) return;
-            
+
             // Проверяем, есть ли данные для дропдауна (tagConfig должен быть загружен)
             if (Object.keys(tagConfig).length === 0) {
                 // Данные еще не загружены, просто сохраняем значение типа
                 typeSelect.value = typeValue;
                 return;
             }
-            
+
             typeSelect.value = typeValue;
             updateValueDropdown(typeSelectId, valueSelectId);
-            
+
             // Ждем обновления дропдауна значений
             const checkValue = () => {
                 if (valueSelect.options.length > 1) {
@@ -1452,12 +1499,14 @@
 
                 // Восстанавливаем значения группы A
                 if (state.hypothesisId) document.getElementById('hypothesisId').value = state.hypothesisId;
+                if (state.monthA) document.getElementById('monthA').value = state.monthA;
                 if (state.tagType1A) restoreDropdownValue('tagType1A', 'tagValue1A', state.tagType1A, state.tagValue1A);
                 if (state.tagType2A) restoreDropdownValue('tagType2A', 'tagValue2A', state.tagType2A, state.tagValue2A);
                 if (state.tagType3A) restoreDropdownValue('tagType3A', 'tagValue3A', state.tagType3A, state.tagValue3A);
 
                 // Восстанавливаем значения группы B
                 if (state.hypothesisIdB) document.getElementById('hypothesisIdB').value = state.hypothesisIdB;
+                if (state.monthB) document.getElementById('monthB').value = state.monthB;
                 if (state.tagType1B) restoreDropdownValue('tagType1B', 'tagValue1B', state.tagType1B, state.tagValue1B);
                 if (state.tagType2B) restoreDropdownValue('tagType2B', 'tagValue2B', state.tagType2B, state.tagValue2B);
                 if (state.tagType3B) restoreDropdownValue('tagType3B', 'tagValue3B', state.tagType3B, state.tagValue3B);
@@ -1494,7 +1543,7 @@
 
             // Сохраняем состояние формы перед переходом
             saveFormState();
-            
+
             // Сохраняем рецепт для AI анализа (нужен для tag_analysis.html)
             saveFiltersForAI();
 
@@ -1557,6 +1606,7 @@
 
                     updateTypeDropdownsFromConfig();
                     updateHypothesisDropdown();
+                    updateMonthDropdowns();
 
                     const status = document.getElementById('connectionStatus');
                     const timestamp = localStorage.getItem('sheetsDataTimestamp');
@@ -1580,10 +1630,10 @@
             const savedUrl = localStorage.getItem('sheetsScriptUrl');
             if (savedUrl) {
                 document.getElementById('scriptUrl').value = savedUrl;
-                
+
                 // Пытаемся загрузить данные из localStorage
                 const dataLoaded = loadDataFromStorage();
-                
+
                 if (dataLoaded) {
                     // Данные загружены из кэша, восстанавливаем состояние формы
                     setTimeout(() => {
