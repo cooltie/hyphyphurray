@@ -899,6 +899,14 @@
         }
 
         // Обновить дропдауны месяцев
+        function formatMonthName(dateRangeStr) {
+            if (!dateRangeStr || !dateRangeStr.includes('-')) return dateRangeStr;
+            const startDate = dateRangeStr.split(' - ')[0];
+            const dateObj = new Date(startDate);
+            let formatted = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+
         function updateMonthDropdowns() {
             const selects = [
                 document.getElementById('monthFromA'),
@@ -914,7 +922,7 @@
                 const isFrom = select.id.includes('From');
                 select.innerHTML = `<option value="">-- ${isFrom ? 'От' : 'До'} --</option>`;
                 months.forEach(month => {
-                    select.innerHTML += `<option value="${month}">${month}</option>`;
+                    select.innerHTML += `<option value="${month}">${formatMonthName(month)}</option>`;
                 });
 
                 if (currentVal && months.includes(currentVal)) {
@@ -1294,11 +1302,34 @@
             let baseA = filterByHypothesis(baseData, hypIdA);
             let baseB = filterByHypothesis(baseData, hypIdB);
 
-            if (monthFromA) baseA = baseA.filter(row => row['Month'] >= monthFromA);
-            if (monthToA) baseA = baseA.filter(row => row['Month'] <= monthToA);
+            // Функция проверки вхождения диапазона из строки Month в выбранный период
+            function filterByDateRange(data, monthFrom, monthTo) {
+                if (!monthFrom && !monthTo) return data;
 
-            if (monthFromB) baseB = baseB.filter(row => row['Month'] >= monthFromB);
-            if (monthToB) baseB = baseB.filter(row => row['Month'] <= monthToB);
+                return data.filter(row => {
+                    const rowMonth = row['Month'];
+                    if (!rowMonth) return false;
+
+                    const [rowStart, rowEnd] = rowMonth.split(' - ');
+
+                    let passesFrom = true;
+                    if (monthFrom) {
+                        const [fromStart] = monthFrom.split(' - ');
+                        passesFrom = rowStart >= fromStart;
+                    }
+
+                    let passesTo = true;
+                    if (monthTo) {
+                        const [, toEnd] = monthTo.split(' - ');
+                        passesTo = rowEnd <= toEnd;
+                    }
+
+                    return passesFrom && passesTo;
+                });
+            }
+
+            baseA = filterByDateRange(baseA, monthFromA, monthToA);
+            baseB = filterByDateRange(baseB, monthFromB, monthToB);
 
             console.log(`📌 Group A: Hypothesis="${hypIdA}", Month="${monthFromA || 'Any'} - ${monthToA || 'Any'}" → ${baseA.length} строк базы`);
             console.log(`📌 Group B: Hypothesis="${hypIdB}", Month="${monthFromB || 'Any'} - ${monthToB || 'Any'}" → ${baseB.length} строк базы`);
